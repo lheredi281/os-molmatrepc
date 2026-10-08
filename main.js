@@ -103,9 +103,59 @@ app.whenReady().then(async () => {
     }
   });
 
-  // --- CONTROLADORES WI-FI KIOSCO ---
+  // --- CONTROLADORES WI-FI, KIOSCO Y USB ---
   const { exec } = require('child_process');
+  const fs = require('fs');
+  const os = require('os');
   
+  // Crear carpeta local de publicidades si no existe
+  const adsFolder = path.join(os.homedir(), 'tablero', 'publicidades');
+  if (!fs.existsSync(adsFolder)) {
+    fs.mkdirSync(adsFolder, { recursive: true });
+  }
+
+  // --- USB Y ARCHIVOS ---
+  ipcMain.handle('get-ads-folder', () => adsFolder);
+
+  ipcMain.handle('list-usbs', () => {
+    // En Linux, udiskie monta en /media/<usuario>
+    const mediaPath = path.join('/media', os.userInfo().username);
+    try {
+      if (!fs.existsSync(mediaPath)) return [];
+      return fs.readdirSync(mediaPath).map(folder => ({
+        name: folder,
+        path: path.join(mediaPath, folder)
+      }));
+    } catch(e) { return []; }
+  });
+
+  ipcMain.handle('list-files', (event, dirPath) => {
+    try {
+      if (!fs.existsSync(dirPath)) return [];
+      return fs.readdirSync(dirPath)
+        .filter(f => f.match(/\.(mp4|jpg|png|jpeg)$/i))
+        .map(f => ({ name: f, path: path.join(dirPath, f) }));
+    } catch(e) { return []; }
+  });
+
+  ipcMain.handle('copy-file', (event, sourcePath, destName) => {
+    try {
+      const destPath = path.join(adsFolder, destName);
+      fs.copyFileSync(sourcePath, destPath);
+      return { success: true };
+    } catch(e) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('delete-file', (event, fileName) => {
+    try {
+      fs.unlinkSync(path.join(adsFolder, fileName));
+      return { success: true };
+    } catch(e) { return { success: false }; }
+  });
+
+  // --- WI-FI ---
   ipcMain.handle('wifi-scan', () => {
     return new Promise((resolve) => {
       exec('nmcli -t -f SSID,SIGNAL dev wifi', (error, stdout) => {

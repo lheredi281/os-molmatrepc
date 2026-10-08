@@ -179,21 +179,36 @@
             // ==========================================
             let selectedSSID = '';
 
-            // Botón flotante para abrir Wi-Fi (solo visible con mouse)
-            const wifiBtn = document.createElement('div');
-            wifiBtn.innerHTML = '⚙️ RED';
-            wifiBtn.style.cssText = 'position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 50px; cursor: pointer; color: white; font-family: sans-serif; z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;';
-            document.body.appendChild(wifiBtn);
+            // Botones flotantes (Redes y USB)
+            const floatMenu = document.createElement('div');
+            floatMenu.style.cssText = 'position: absolute; bottom: 20px; right: 20px; z-index: 10000; display: flex; gap: 15px; opacity: 0; transition: opacity 0.3s;';
 
-            // Mostrar el engranaje solo si se mueve el mouse
+            const btnStyle = 'width: 60px; height: 60px; border-radius: 50%; background: rgba(15,23,42,0.9); border: 2px solid #38bdf8; color: white; font-size: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.5);';
+
+            const btnUsb = document.createElement('div');
+            btnUsb.innerHTML = '📁';
+            btnUsb.title = "Explorador USB";
+            btnUsb.style.cssText = btnStyle;
+
+            const btnWifi = document.createElement('div');
+            btnWifi.innerHTML = '⚙️';
+            btnWifi.title = "Wi-Fi";
+            btnWifi.style.cssText = btnStyle;
+
+            floatMenu.appendChild(btnUsb);
+            floatMenu.appendChild(btnWifi);
+            document.body.appendChild(floatMenu);
+
             let mouseTimer;
             window.addEventListener('mousemove', () => {
-                wifiBtn.style.opacity = '1';
+                floatMenu.style.opacity = '1';
                 clearTimeout(mouseTimer);
-                mouseTimer = setTimeout(() => wifiBtn.style.opacity = '0', 3000);
+                mouseTimer = setTimeout(() => floatMenu.style.opacity = '0', 3000);
             });
 
-            // Crear Modal Wi-Fi dinámicamente
+            // ==========================================
+            // MODAL WI-FI
+            // ==========================================
             const wifiModal = document.createElement('div');
             wifiModal.id = 'wifi-modal';
             wifiModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;';
@@ -201,17 +216,13 @@
             wifiModal.innerHTML = `
                 <div style="background: #1e293b; padding: 30px; border-radius: 15px; width: 60%; max-width: 600px; border: 2px solid #334155;">
                     <h2 style="color: white; margin-top: 0;">Configuración Wi-Fi</h2>
-                    <button onclick="document.getElementById('wifi-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:red; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer;">CerrAR (X)</button>
-                    
+                    <button onclick="document.getElementById('wifi-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:red; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer;">X</button>
                     <div id="wifi-list" style="height: 300px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 8px;">
                         <p style="color: #94a3b8; text-align: center;">Escaneando redes...</p>
                     </div>
-
                     <div id="wifi-password-section" style="display: none; margin-top: 20px;">
                         <p style="color: #38bdf8; margin: 0 0 10px 0;" id="wifi-selected-name"></p>
                         <input type="text" id="wifi-pass-input" placeholder="Contraseña..." readonly style="width: calc(100% - 20px); padding: 15px; font-size: 20px; border-radius: 8px; border: none; background: #334155; color: white;">
-                        
-                        <!-- Mini Teclado en pantalla -->
                         <div id="osk" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 15px;">
                             ${"1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split('').map(k => 
                                 `<button onclick="document.getElementById('wifi-pass-input').value += '${k}'" style="padding:15px; font-size:18px; background:#475569; color:white; border:none; border-radius:5px; cursor:pointer;">${k}</button>`
@@ -225,11 +236,10 @@
             `;
             document.body.appendChild(wifiModal);
 
-            wifiBtn.onclick = async () => {
+            btnWifi.onclick = async () => {
                 wifiModal.style.display = 'flex';
                 document.getElementById('wifi-list').innerHTML = '<p style="color:#94a3b8; text-align:center;">Buscando redes...</p>';
                 document.getElementById('wifi-password-section').style.display = 'none';
-                
                 try {
                     const networks = await ipcRenderer.invoke('wifi-scan');
                     let html = '';
@@ -263,8 +273,121 @@
                         alert(`Error al conectar: ${res.error}`);
                         document.getElementById('wifi-selected-name').innerText = `Intenta de nuevo: ${selectedSSID}`;
                     }
-                } catch (e) {
-                    alert("Error en el sistema de red.");
+                } catch (e) { alert("Error en el sistema de red."); }
+            };
+
+            // ==========================================
+            // MODAL USB (EXPLORADOR)
+            // ==========================================
+            const usbModal = document.createElement('div');
+            usbModal.id = 'usb-modal';
+            usbModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;';
+            
+            usbModal.innerHTML = `
+                <div style="background: #1e293b; padding: 20px; border-radius: 15px; width: 90%; height: 85%; border: 2px solid #334155; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 style="color: white; margin: 0;">Explorador de Medios USB</h2>
+                        <button onclick="document.getElementById('usb-modal').style.display='none'" style="background:red; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">CERRAR (X)</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden;">
+                        <!-- PANEL IZQUIERDO: PENDRIVE -->
+                        <div style="background: #0f172a; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; overflow: hidden;">
+                            <h3 style="color: #38bdf8; margin-top: 0;">Origen: Pendrive</h3>
+                            <select id="usb-selector" onchange="loadUsbFiles()" style="padding: 10px; border-radius: 5px; background: #334155; color: white; border: none; margin-bottom: 10px;">
+                                <option value="">Detectando USBs...</option>
+                            </select>
+                            <div id="usb-files" style="flex: 1; overflow-y: auto; background: #1e293b; border-radius: 5px; padding: 10px;">
+                                <p style="color:#94a3b8; text-align:center;">Selecciona un pendrive arriba</p>
+                            </div>
+                        </div>
+
+                        <!-- PANEL DERECHO: DISCO LOCAL -->
+                        <div style="background: #0f172a; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; overflow: hidden;" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+                            <h3 style="color: #22c55e; margin-top: 0;">Destino: Tablero</h3>
+                            <p style="color:#94a3b8; margin-top:0; font-size:12px;">Arrastra videos/imágenes desde la izquierda hacia aquí para copiarlos.</p>
+                            <div id="local-files" style="flex: 1; overflow-y: auto; background: #1e293b; border-radius: 5px; padding: 10px;">
+                                <p style="color:#94a3b8; text-align:center;">Cargando archivos locales...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(usbModal);
+
+            let currentUsbPath = '';
+
+            btnUsb.onclick = async () => {
+                usbModal.style.display = 'flex';
+                await refreshLocalFiles();
+                const usbs = await ipcRenderer.invoke('list-usbs');
+                const selector = document.getElementById('usb-selector');
+                
+                if (usbs.length === 0) {
+                    selector.innerHTML = '<option value="">No hay pendrives conectados</option>';
+                    document.getElementById('usb-files').innerHTML = '<p style="color:red; text-align:center;">Inserta un USB y vuelve a abrir el menú.</p>';
+                } else {
+                    selector.innerHTML = '<option value="">-- Selecciona un Pendrive --</option>' + usbs.map(u => `<option value="${u.path}">${u.name}</option>`).join('');
+                }
+            };
+
+            window.loadUsbFiles = async () => {
+                currentUsbPath = document.getElementById('usb-selector').value;
+                if (!currentUsbPath) return;
+                
+                document.getElementById('usb-files').innerHTML = '<p style="color:#94a3b8;">Cargando...</p>';
+                const files = await ipcRenderer.invoke('list-files', currentUsbPath);
+                
+                if (files.length === 0) {
+                    document.getElementById('usb-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">No hay fotos ni videos aquí.</p>';
+                    return;
+                }
+                
+                document.getElementById('usb-files').innerHTML = files.map(f => 
+                    `<div draggable="true" ondragstart="event.dataTransfer.setData('sourcePath', '${f.path.replace(/\\/g, '\\\\')}'); event.dataTransfer.setData('fileName', '${f.name}')" style="padding:15px; background:#334155; color:white; margin-bottom:5px; border-radius:5px; cursor:grab; border-left:4px solid #38bdf8;">
+                        📄 ${f.name} (Arrastrar)
+                    </div>`
+                ).join('');
+            };
+
+            window.refreshLocalFiles = async () => {
+                const adsFolder = await ipcRenderer.invoke('get-ads-folder');
+                const files = await ipcRenderer.invoke('list-files', adsFolder);
+                
+                if (files.length === 0) {
+                    document.getElementById('local-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">Carpeta vacía.</p>';
+                    return;
+                }
+                
+                document.getElementById('local-files').innerHTML = files.map(f => 
+                    `<div style="padding:15px; background:#334155; color:white; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #22c55e;">
+                        <span>✅ ${f.name}</span>
+                        <button onclick="deleteLocalFile('${f.name}')" style="background:red; color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;" title="Borrar">X</button>
+                    </div>`
+                ).join('');
+            };
+
+            window.handleDrop = async (event) => {
+                event.preventDefault();
+                const sourcePath = event.dataTransfer.getData('sourcePath');
+                const fileName = event.dataTransfer.getData('fileName');
+                if (!sourcePath || !fileName) return;
+
+                document.getElementById('local-files').innerHTML += `<p style="color:yellow; text-align:center;">Copiando ${fileName}...</p>`;
+                
+                const res = await ipcRenderer.invoke('copy-file', sourcePath, fileName);
+                if (res.success) {
+                    await refreshLocalFiles();
+                } else {
+                    alert('Error al copiar: ' + res.error);
+                    await refreshLocalFiles();
+                }
+            };
+
+            window.deleteLocalFile = async (fileName) => {
+                if (confirm('¿Seguro que deseas borrar ' + fileName + '?')) {
+                    await ipcRenderer.invoke('delete-file', fileName);
+                    await refreshLocalFiles();
                 }
             };
         }
