@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
-
+const { exec } = require('child_process');
 // Habilitar recarga en caliente (Hot Reload)
 try {
   require('electron-reload')(__dirname, {
@@ -77,6 +77,14 @@ async function autoDetectSerialPort() {
 }
 
 app.whenReady().then(async () => {
+  // HDMI-CEC: Encender TV y forzar fuente HDMI
+  if (process.platform === 'linux') {
+    console.log("[CEC] Enviando señal para encender la TV...");
+    exec('echo "on 0" | cec-client -s -d 1', () => {
+      exec('echo "as" | cec-client -s -d 1');
+    });
+  }
+
   // Inicializar Puerto Serie con auto-detección primero
   const portToUse = await autoDetectSerialPort();
   initSerialPort(portToUse); 
