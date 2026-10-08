@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Anotador FIBA</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Pantalla de inicio animada -->
+    <div id="splash-screen" class="splash">
+        <div class="logo-container">
+            <div class="spinner"></div>
+            <h1>INICIANDO SISTEMA</h1>
+            <p>Cargando componentes...</p>
+        </div>
+    </div>
+
+    <!-- Contenedor de Publicidad (Se muestra cuando no hay mando) -->
+    <div id="ads-container" class="hidden" style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: black; z-index: 50; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; display: none;">
+        <video id="ad-video" style="width: 100%; height: 100%; object-fit: cover; display: none;" muted></video>
+        <img id="ad-image" style="width: 100%; height: 100%; object-fit: contain; display: none;" src="" />
+        <h1 id="ad-loading" style="color: white; font-family: sans-serif; font-size: 2vw;">Esperando Publicidad...</h1>
+    </div>
+
+    <!-- Xbox-style Dashboard (Solo Mando) -->
+    <div id="xbox-dashboard" class="hidden" style="position: absolute; top: 20px; left: 20px; background: rgba(15, 23, 42, 0.9); border: 2px solid #334155; border-radius: 12px; padding: 15px; z-index: 100; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+        <h3 style="color: white; margin: 0 0 10px 0; font-family: 'Roboto Mono', monospace; font-size: 16px; border-bottom: 1px solid #334155; padding-bottom: 5px;">ESTADO DEL SISTEMA</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <span style="color: #94a3b8; font-weight: bold; font-family: sans-serif;">TVs Vinculadas:</span>
+                <span id="dash-vinculadas" style="color: #38bdf8; font-family: 'Share Tech Mono', monospace; font-size: 20px;">0/18</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <span style="color: #94a3b8; font-weight: bold; font-family: sans-serif;">TVs Online:</span>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="dash-status-led" style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444;"></div>
+                    <span id="dash-online" style="color: #22c55e; font-family: 'Share Tech Mono', monospace; font-size: 20px;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablero Principal FIBA (3 Columnas) -->
+    <div id="scoreboard" class="scoreboard hidden">
+        
+
+
+        <!-- PANEL CENTRAL: RELOJ Y PUNTOS -->
+        <div class="center-panel">
+            <!-- Reloj Principal -->
+            <div class="clock-box" onclick="editClock()" style="cursor: pointer;" title="Haz clic para editar el tiempo">
+                <span id="main-clock" class="digital-number glow-red large-clock">12:00</span>
+            </div>
+            
+            <!-- Marcador y Período -->
+            <div class="scores-row">
+                <div class="score-column">
+                    <h2 class="team-name" style="font-size: 60px; margin-bottom: 10px;">LOCAL</h2>
+                    <div class="score-wrapper">
+                        <span id="home-score" class="digital-number glow-red huge-score">00</span>
+                    </div>
+                </div>
+                
+                <div class="period-wrapper" onclick="nextPeriod()" style="cursor: pointer;" title="Haz clic para avanzar de periodo">
+                    <div class="label">PERIODO</div>
+                    <span id="period" class="digital-number glow-yellow medium-score">1</span>
+                    <div class="label" style="margin-top: 20px; font-size: 24px;">24S</div>
+                    <span id="shot-clock" class="digital-number glow-red" style="font-size: 80px;">24</span>
+                </div>
+
+                <div class="score-column">
+                    <h2 class="team-name" style="font-size: 60px; margin-bottom: 10px;">VISITA</h2>
+                    <div class="score-wrapper">
+                        <span id="guest-score" class="digital-number glow-red huge-score">00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas de Equipo (Faltas y Timeouts) -->
+            <div class="team-stats-row">
+                <!-- Stats Local -->
+                <div class="team-stats">
+                    <div class="label">FALTAS</div>
+                    <span id="home-team-fouls" class="digital-number glow-yellow small-score">0</span>
+                    <div id="home-bonus" class="bonus-indicator">BONUS</div>
+                    <div class="timeouts" id="home-timeouts">
+                        <div class="to-led active"></div>
+                        <div class="to-led active"></div>
+                        <div class="to-led active"></div>
+                    </div>
+                </div>
+
+
+                <!-- Stats Visita -->
+                <div class="team-stats">
+                    <div class="label">FALTAS</div>
+                    <span id="guest-team-fouls" class="digital-number glow-yellow small-score">0</span>
+                    <div id="guest-bonus" class="bonus-indicator">BONUS</div>
+                    <div class="timeouts" id="guest-timeouts">
+                        <div class="to-led active"></div>
+                        <div class="to-led active"></div>
+                        <div class="to-led active"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal para Editar Reloj -->
+    <div id="modal-backdrop" onclick="closeClockModal()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999;"></div>
+    <div id="clock-modal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#0f172a; padding:30px; border-radius:15px; border:2px solid #334155; z-index:1000; text-align:center; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
+        <h2 style="color:white; margin-top:0; font-family:'Roboto Mono', monospace;">AJUSTAR RELOJ</h2>
+        <p style="color:#94a3b8; font-family:sans-serif; margin-bottom:20px;">Ingresa el tiempo en minutos (ej: 4.5 para 4:30)</p>
+        <input type="number" id="clock-input" step="0.1" style="font-size:32px; width:150px; text-align:center; padding:10px; border-radius:10px; border:none; background:#1e293b; color:#fff; outline:none; font-family:'Roboto Mono', monospace;">
+        <br><br><br>
+        <button onclick="saveClock()" style="padding:10px 25px; font-size:18px; cursor:pointer; background:#22c55e; color:white; border:none; border-radius:8px; font-weight:bold; margin-right:10px;">GUARDAR</button>
+        <button onclick="closeClockModal()" style="padding:10px 25px; font-size:18px; cursor:pointer; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold;">CANCELAR</button>
+    </div>
+    <!-- Mensaje de SYNC MODO -->
+    <div id="sync-overlay" style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); color: #4ade80; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <h1 style="font-size: 6vw; margin: 0; opacity: 0.8;">[ MODO SYNC ACTIVADO ]</h1>
+        <p style="font-size: 2vw; color: white;">Presione "SYNC" en el Mando Arbitral ahora...</p>
+        <p id="sync-timer" style="font-size: 1.5vw; color: #a855f7; margin-top: 20px;">15s restantes</p>
+    </div>
+
+    <script>
+        // Función para enviar orden de sincronización a la ESP32 de la TV
+        function forceSync() {
+            if (window.ipcRenderer) {
+                // El comando 155 es el que la ESP32 (TV) escucha por USB para entrar en modo SYNC
+                window.ipcRenderer.send('virtual-command', { cmd: 155, team: 0, player: 0, value: 0 });
+                alert("¡TV en modo Emparejamiento!\nAhora presiona el botón SYNC en tu ventana de Mando.");
+            }
+        }
+    </script>
+    <script src="renderer.js"></script>
+    <script>
+        // Si el archivo fue cargado en Electron (tiene Node integration habilitado)
+        if (typeof require !== 'undefined') {
+            const { ipcRenderer } = require('electron');
+            
+            // Atajo de Teclado Shift + Espacio para poner la placa TV en modo emparejamiento
+            window.addEventListener('keydown', (e) => {
+                if (e.key === ' ' && e.shiftKey) {
+                    // Manda señal a la ESP32 conectada a la PC TV
+                    ipcRenderer.send('virtual-command', { cmd: 155, team: 0, player: 0, value: 0 });
+                    
+                    // Mostrar Interfaz Visual
+                    const syncOverlay = document.getElementById('sync-overlay');
+                    const syncTimer = document.getElementById('sync-timer');
+                    syncOverlay.style.display = 'flex';
+                    
+                    let timeLeft = 15;
+                    syncTimer.innerText = `${timeLeft}s restantes`;
+                    
+                    const interval = setInterval(() => {
+                        timeLeft--;
+                        if(timeLeft > 0) {
+                            syncTimer.innerText = `${timeLeft}s restantes`;
+                        } else {
+                            clearInterval(interval);
+                            syncOverlay.style.display = 'none';
+                        }
+                    }, 1000);
+                    
+                    // Si llega un comando 153 o un punto o algo del mando, podemos ocultarlo
+                    ipcRenderer.on('serial-command', (event, data) => {
+                        clearInterval(interval);
+                        syncOverlay.style.display = 'none';
+                    });
+                }
+            });
+
+            // ==========================================
+            // LOGICA WI-FI KIOSCO Y TECLADO VIRTUAL
+            // ==========================================
+            let selectedSSID = '';
+
+            // Botón flotante para abrir Wi-Fi (solo visible con mouse)
+            const wifiBtn = document.createElement('div');
+            wifiBtn.innerHTML = '⚙️ RED';
+            wifiBtn.style.cssText = 'position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 50px; cursor: pointer; color: white; font-family: sans-serif; z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;';
+            document.body.appendChild(wifiBtn);
+
+            // Mostrar el engranaje solo si se mueve el mouse
+            let mouseTimer;
+            window.addEventListener('mousemove', () => {
+                wifiBtn.style.opacity = '1';
+                clearTimeout(mouseTimer);
+                mouseTimer = setTimeout(() => wifiBtn.style.opacity = '0', 3000);
+            });
+
+            // Crear Modal Wi-Fi dinámicamente
+            const wifiModal = document.createElement('div');
+            wifiModal.id = 'wifi-modal';
+            wifiModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;';
+            
+            wifiModal.innerHTML = `
+                <div style="background: #1e293b; padding: 30px; border-radius: 15px; width: 60%; max-width: 600px; border: 2px solid #334155;">
+                    <h2 style="color: white; margin-top: 0;">Configuración Wi-Fi</h2>
+                    <button onclick="document.getElementById('wifi-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:red; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer;">CerrAR (X)</button>
+                    
+                    <div id="wifi-list" style="height: 300px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 8px;">
+                        <p style="color: #94a3b8; text-align: center;">Escaneando redes...</p>
+                    </div>
+
+                    <div id="wifi-password-section" style="display: none; margin-top: 20px;">
+                        <p style="color: #38bdf8; margin: 0 0 10px 0;" id="wifi-selected-name"></p>
+                        <input type="text" id="wifi-pass-input" placeholder="Contraseña..." readonly style="width: calc(100% - 20px); padding: 15px; font-size: 20px; border-radius: 8px; border: none; background: #334155; color: white;">
+                        
+                        <!-- Mini Teclado en pantalla -->
+                        <div id="osk" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 15px;">
+                            ${"1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split('').map(k => 
+                                `<button onclick="document.getElementById('wifi-pass-input').value += '${k}'" style="padding:15px; font-size:18px; background:#475569; color:white; border:none; border-radius:5px; cursor:pointer;">${k}</button>`
+                            ).join('')}
+                            <button onclick="document.getElementById('wifi-pass-input').value += ' '" style="grid-column: span 5; padding:15px; background:#475569; color:white; border:none; border-radius:5px; cursor:pointer;">ESPACIO</button>
+                            <button onclick="let v = document.getElementById('wifi-pass-input').value; document.getElementById('wifi-pass-input').value = v.slice(0, -1)" style="grid-column: span 3; padding:15px; background:#ef4444; color:white; border:none; border-radius:5px; cursor:pointer;">BORRAR</button>
+                            <button onclick="connectWifi()" style="grid-column: span 2; padding:15px; background:#22c55e; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">CONECTAR</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(wifiModal);
+
+            wifiBtn.onclick = async () => {
+                wifiModal.style.display = 'flex';
+                document.getElementById('wifi-list').innerHTML = '<p style="color:#94a3b8; text-align:center;">Buscando redes...</p>';
+                document.getElementById('wifi-password-section').style.display = 'none';
+                
+                try {
+                    const networks = await ipcRenderer.invoke('wifi-scan');
+                    let html = '';
+                    networks.forEach(n => {
+                        html += `<div onclick="selectWifi('${n.ssid}')" style="padding: 15px; background: #334155; color: white; margin-bottom: 5px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between;">
+                            <span>${n.ssid}</span> <span style="color: #38bdf8;">Señal: ${n.signal}%</span>
+                        </div>`;
+                    });
+                    document.getElementById('wifi-list').innerHTML = html || '<p style="color:red; text-align:center;">No se encontraron redes.</p>';
+                } catch (e) {
+                    document.getElementById('wifi-list').innerHTML = '<p style="color:red; text-align:center;">Error al escanear Wi-Fi.</p>';
+                }
+            };
+
+            window.selectWifi = (ssid) => {
+                selectedSSID = ssid;
+                document.getElementById('wifi-selected-name').innerText = `Conectando a: ${ssid}`;
+                document.getElementById('wifi-pass-input').value = '';
+                document.getElementById('wifi-password-section').style.display = 'block';
+            };
+
+            window.connectWifi = async () => {
+                const pass = document.getElementById('wifi-pass-input').value;
+                document.getElementById('wifi-selected-name').innerText = `Conectando a ${selectedSSID}... por favor espera`;
+                try {
+                    const res = await ipcRenderer.invoke('wifi-connect', selectedSSID, pass);
+                    if (res.success) {
+                        alert(`¡Conectado exitosamente a ${selectedSSID}!`);
+                        wifiModal.style.display = 'none';
+                    } else {
+                        alert(`Error al conectar: ${res.error}`);
+                        document.getElementById('wifi-selected-name').innerText = `Intenta de nuevo: ${selectedSSID}`;
+                    }
+                } catch (e) {
+                    alert("Error en el sistema de red.");
+                }
+            };
+        }
+    </script>
+</body>
+</html>

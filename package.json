@@ -1,0 +1,24 @@
+{
+  "name": "tablero-basquet",
+  "version": "1.0.0",
+  "description": "Tablero anotador de básquet para TV con ESP32",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "electron",
+    "scoreboard",
+    "basketball"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "serialport": "^12.0.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-reload": "^2.0.0-alpha.1"
+  }
+}

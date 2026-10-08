@@ -1,0 +1,236 @@
+:root {
+    --bg-color: #0f172a; 
+    --panel-bg: #1e293b; 
+    --red-glow: #ff2a2a; 
+    --yellow-glow: #ffcc00; 
+    --green-glow: #22c55e;
+    --text-color: #f8fafc;
+    --label-color: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; 
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.digital-number {
+    font-family: 'Share Tech Mono', monospace;
+    line-height: 1;
+}
+
+.glow-red { color: var(--red-glow); text-shadow: 0 0 5px rgba(255, 42, 42, 1), 0 0 10px rgba(255, 42, 42, 0.8); }
+.glow-yellow { color: var(--yellow-glow); text-shadow: 0 0 5px rgba(255, 204, 0, 1), 0 0 10px rgba(255, 204, 0, 0.8); }
+
+/* Splash Screen (Igual que antes) */
+.splash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 1.5s ease-in-out; }
+.logo-container { text-align: center; }
+.spinner { width: 80px; height: 80px; border: 8px solid rgba(255, 255, 255, 0.05); border-top: 8px solid var(--yellow-glow); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 30px auto; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.splash h1 { font-size: 77px; letter-spacing: 5px; }
+.splash p { font-size: 29px; margin-top: 20px; color: var(--label-color); }
+.hidden { opacity: 0; pointer-events: none; display: none !important; }
+
+/* TABLERO FIBA (3 Columnas) */
+.scoreboard {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;
+    height: 1080px;
+    transform: translate(-50%, -50%);
+    transform-origin: center center;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* PANELES LATERALES (Jugadores) */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    width: 18%;
+    background: var(--panel-bg);
+    border: 4px solid #334155;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.team-name {
+    font-size: 58px;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #334155;
+    padding-bottom: 10px;
+}
+
+.players-list {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0f172a;
+    padding: 2px 8px; /* Reducido para juntarlos más */
+    border-radius: 6px;
+    border: 1px solid #1e293b;
+}
+
+.player-dorsal {
+    font-size: 35px;
+    width: 25%;
+    text-align: left;
+}
+
+.court-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #333; /* Apagado */
+}
+.court-indicator.active {
+    background: var(--green-glow);
+    box-shadow: 0 0 5px var(--green-glow);
+}
+
+.foul-leds {
+    display: flex;
+    gap: 3px;
+}
+.foul-led {
+    width: 13px;
+    height: 29px;
+    background: #333;
+    border-radius: 3px;
+}
+.foul-led.green { background: var(--green-glow); box-shadow: 0 0 3px var(--green-glow); }
+.foul-led.yellow { background: var(--yellow-glow); box-shadow: 0 0 3px var(--yellow-glow); }
+.foul-led.red { background: var(--red-glow); box-shadow: 0 0 3px var(--red-glow); }
+.player-row.disqualified { background: #450a0a; border-color: var(--red-glow); }
+
+/* PANEL CENTRAL MAXIMIZADO */
+.center-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 20px 40px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.clock-box {
+    background: #0f172a;
+    width: 90%;
+    text-align: center;
+    border-radius: 20px;
+    padding: 0;
+    border: 4px solid #334155;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    margin-bottom: 0px;
+}
+.large-clock { font-size: 280px; line-height: 1; margin: 0; padding: 0; }
+
+.scores-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 0;
+}
+.score-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 42%;
+}
+.score-wrapper {
+    background: #0f172a;
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 4px solid #334155;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+.huge-score { font-size: 300px; transition: font-size 0.3s; line-height: 1; margin: 0; padding: 0; }
+.huge-score.triple-digit { font-size: 220px; }
+
+.period-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0px;
+}
+.label { font-size: 40px; color: var(--label-color); font-weight: bold; margin-bottom: 0px;}
+.medium-score { font-size: 150px; line-height: 1; margin: 0; padding: 0; }
+
+.team-stats-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 0px;
+    padding: 0 50px;
+}
+.team-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #0f172a;
+    padding: 10px 30px; 
+    border-radius: 15px;
+    border: 3px solid #334155;
+    min-width: 30%; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.small-score { font-size: 100px; line-height: 1; margin: 0; } 
+
+.bonus-indicator {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    background: #111;
+    padding: 5px 20px;
+    border-radius: 5px;
+    margin: 5px 0;
+    letter-spacing: 3px;
+}
+.bonus-indicator.active {
+    color: #000;
+    background: var(--red-glow);
+    box-shadow: 0 0 10px var(--red-glow);
+}
+
+.timeouts { display: flex; gap: 15px; margin-top: 15px; }
+.to-led {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #333;
+}
+.to-led.active { background: var(--yellow-glow); box-shadow: 0 0 15px var(--yellow-glow); }
+
+.possession-arrow {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+.arrow { font-size: 150px; color: #333; }
+.arrow.active { color: var(--red-glow); text-shadow: 0 0 20px var(--red-glow); }

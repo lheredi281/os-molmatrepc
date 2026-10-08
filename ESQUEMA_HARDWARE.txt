@@ -1,0 +1,69 @@
+===========================================================
+    ESQUEMA DE CONEXION HARDWARE - TABLERO FIBA TV
+===========================================================
+
+-----------------------------------------------------------
+1. PLACA RECEPTOR (TV GIGANTE)
+-----------------------------------------------------------
+Esta placa va detrás del televisor y solo requiere hardware 
+para señales visuales y sonoras directas.
+
+PIN 2  --> LED de Estado (SYNC). Conectar pata larga al pin 2 y pata corta a GND con resistencia de 330 ohm.
+PIN 4  --> Módulo Relé para BOCINA. Conectar el pin de señal (S) del relé aquí. Se activa a 3.3V por 2s.
+PIN 15 --> Botón físico de Emparejamiento/SYNC. Conectar una pata al Pin 15 y la otra a GND (G).
+
+
+-----------------------------------------------------------
+2. PLACA TRANSMISOR (CONSOLA DE MANDO DE MADERA)
+-----------------------------------------------------------
+Para lograr 24 botones usando solo 10 pines, usamos una 
+"Matriz de Teclado" de 5x5.
+
+**PINES DE LA ESP32 A USAR:**
+- Filas (R1 a R5): Pines 13, 14, 25, 26, 27
+- Columnas (C1 a C5): Pines 32, 33, 21, 22, 23
+- LED Estado: Pin 2 (igual que en la TV, para saber si está conectada).
+
+**¿COMO SE SOLDA?**
+Un botón Arcade tiene 2 conectores. 
+Uno se soldará a un cable de "Fila" y el otro a un cable de "Columna".
+
+*Fila 1 (Cable desde Pin 13) se conecta a los botones de:*
+- Columna 1 (Pin 32) = LOCAL +1 PTS
+- Columna 2 (Pin 33) = LOCAL +2 PTS
+- Columna 3 (Pin 21) = LOCAL +3 PTS
+- Columna 4 (Pin 22) = LOCAL -1 PUNTO
+- Columna 5 (Pin 23) = LOCAL + FALTA
+
+*Fila 2 (Cable desde Pin 14) se conecta a los botones de:*
+- Columna 1 (Pin 32) = LOCAL - FALTA
+- Columna 2 (Pin 33) = VISITA +1 PTS
+- Columna 3 (Pin 21) = VISITA +2 PTS
+- Columna 4 (Pin 22) = VISITA +3 PTS
+- Columna 5 (Pin 23) = VISITA -1 PUNTO
+
+*Fila 3 (Cable desde Pin 25) se conecta a los botones de:*
+- Columna 1 (Pin 32) = VISITA + FALTA
+- Columna 2 (Pin 33) = VISITA - FALTA
+- Columna 3 (Pin 21) = START / STOP
+- Columna 4 (Pin 22) = BOCINA MANUAL
+- Columna 5 (Pin 23) = RELOJ A 1 MIN
+
+*Fila 4 (Cable desde Pin 26) se conecta a los botones de:*
+- Columna 1 (Pin 32) = RELOJ A 5 MIN
+- Columna 2 (Pin 33) = RELOJ A 10 MIN
+- Columna 3 (Pin 21) = +1 MINUTO EXTRA
+- Columna 4 (Pin 22) = -1 MINUTO (Restar)
+- Columna 5 (Pin 23) = +1 PERIODO
+
+*Fila 5 (Cable desde Pin 27) se conecta a los botones de:*
+- Columna 1 (Pin 32) = -1 PERIODO
+- Columna 2 (Pin 33) = BOTON EDITAR (Comando)
+- Columna 3 (Pin 21) = BOTON SYNC
+- Columna 4 (Pin 22) = [LIBRE - Antiguo UNPAIR, ahora es COMANDO + SYNC]
+- Columna 5 (Pin 23) = [LIBRE PARA USO FUTURO, EJ. 24S]
+
+IMPORTANTE PARA ARDUINO IDE:
+Para compilar la placa del Mando, necesitas ir al "Gestor de Librerías" 
+en Arduino IDE, buscar "Keypad" (la del autor Mark Stanley, Alexander Brevig) 
+e instalarla.
