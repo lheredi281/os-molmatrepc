@@ -26,8 +26,8 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # 4. Volver a inyectar el modo sin-sandbox para Linux
     sed -i 's/"electron ."/"electron . --no-sandbox"/g' package.json
     
-    # 5. Reiniciar la interfaz gráfica para que cargue la nueva versión
-    sudo systemctl restart lightdm
+    # 5. Reiniciar la interfaz gráfica matando el servidor X (el autologin lo volverá a levantar)
+    sudo pkill X
 else
     echo "El sistema ya está en la última versión."
 fi
