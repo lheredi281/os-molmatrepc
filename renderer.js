@@ -6,6 +6,9 @@ const homeScoreEl = document.getElementById('home-score');
 const guestScoreEl = document.getElementById('guest-score');
 const mainClockEl = document.getElementById('main-clock');
 
+// Estado Global
+let isAdMode = false;
+
 // ==========================================
 // SISTEMA INTELIGENTE DE AUTO-ESCALADO
 // ==========================================
@@ -34,7 +37,9 @@ setTimeout(() => {
     splashScreen.style.opacity = '0';
     setTimeout(() => {
         splashScreen.classList.add('hidden');
-        scoreboard.classList.remove('hidden');
+        if (!isAdMode) {
+            scoreboard.classList.remove('hidden');
+        }
     }, 1500);
 }, 2000);
 
@@ -332,12 +337,15 @@ if (window.require) {
     const adImage = document.getElementById('ad-image');
     const adLoading = document.getElementById('ad-loading');
     
-    let isAdMode = false;
     let adsList = [];
     let currentAdIndex = 0;
     let adTimeout = null;
 
     async function fetchAds() {
+        let supabaseAds = [];
+        let localAds = [];
+
+        // 1. Obtener de la Nube (Vercel/Supabase)
         try {
             const { data, error } = await supabase
                 .from('publicidad')
@@ -345,12 +353,28 @@ if (window.require) {
                 .eq('activo', true)
                 .order('orden', { ascending: true });
                 
-            if (error) throw error;
-            adsList = data || [];
+            if (!error && data) supabaseAds = data;
         } catch (err) {
             console.error("Error fetching ads:", err);
-            adsList = [];
         }
+
+        // 2. Obtener locales (Los que copiaste con el USB)
+        try {
+            const adsFolder = await ipcRenderer.invoke('get-ads-folder');
+            const files = await ipcRenderer.invoke('list-files', adsFolder);
+            localAds = files.map(f => {
+                const isVideo = !!f.name.match(/\.(mp4)$/i);
+                return {
+                    tipo: isVideo ? 'video' : 'imagen',
+                    url_archivo: 'file:///' + f.path.replace(/\\/g, '/'),
+                    duracion_segundos: 10
+                };
+            });
+        } catch (err) {
+            console.error("Error locales:", err);
+        }
+
+        adsList = [...supabaseAds, ...localAds];
     }
 
     function playNextAd() {
@@ -369,7 +393,6 @@ if (window.require) {
         const ad = adsList[currentAdIndex];
         currentAdIndex = (currentAdIndex + 1) % adsList.length;
 
-        // Limpiamos los eventos/timeouts anteriores por seguridad
         clearTimeout(adTimeout);
         adVideo.onended = null;
         adVideo.onerror = null;
@@ -379,19 +402,11 @@ if (window.require) {
             adVideo.style.display = 'block';
             adVideo.src = ad.url_archivo;
             
-            // Cuando termine el video de forma natural, pasamos al siguiente
-            adVideo.onended = () => {
-                playNextAd();
-            };
-            
-            // Si hay un error cargando el video, saltamos para no trabar el ciclo
-            adVideo.onerror = () => {
-                playNextAd();
-            };
+            adVideo.onended = () => playNextAd();
+            adVideo.onerror = () => playNextAd();
 
             adVideo.play().catch(e => {
                 console.log("Video auto-play prevenido", e);
-                // Si el navegador bloquea el auto-play, forzamos pasar al siguiente
                 adTimeout = setTimeout(playNextAd, 5000);
             });
             
@@ -402,7 +417,6 @@ if (window.require) {
             adImage.style.display = 'block';
             adImage.src = ad.url_archivo;
             
-            // Para las imagenes, usamos el valor de la BD (que ahora inyecta 10s fijos) o 10s por defecto
             const durationMs = (ad.duracion_segundos || 10) * 1000;
             adTimeout = setTimeout(playNextAd, durationMs);
         }
@@ -414,6 +428,7 @@ if (window.require) {
             isAdMode = false;
             clearTimeout(adTimeout);
             adVideo.pause();
+            adsContainer.classList.add('hidden'); // IMPORTANTE: Volver a ocultar
             adsContainer.style.display = 'none';
             scoreboard.classList.remove('hidden');
         } else {
@@ -421,6 +436,7 @@ if (window.require) {
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
+                adsContainer.classList.remove('hidden'); // IMPORTANTE: Remover clase hidden
                 adsContainer.style.display = 'flex';
                 await fetchAds();
                 playNextAd();
