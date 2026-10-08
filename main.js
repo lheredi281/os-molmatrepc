@@ -11,6 +11,10 @@ try {
   console.log('electron-reload no está instalado o falló al cargar.');
 }
 
+// Desactivar aceleración de GPU para compatibilidad con Raspberry Pi 2
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-gpu');
 let mainWindow;
 let mandoWindow;
 let globalPort = null;
