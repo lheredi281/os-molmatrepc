@@ -113,7 +113,6 @@ app.whenReady().then(async () => {
   });
 
   // --- CONTROLADORES WI-FI, KIOSCO Y USB ---
-  const { exec } = require('child_process');
   const fs = require('fs');
   const os = require('os');
   
