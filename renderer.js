@@ -1,4 +1,4 @@
-// Lógica del lado del cliente (Frontend)
+﻿// Lógica del lado del cliente (Frontend)
 const splashScreen = document.getElementById('splash-screen');
 const scoreboard = document.getElementById('scoreboard');
 
@@ -7,7 +7,7 @@ const guestScoreEl = document.getElementById('guest-score');
 const mainClockEl = document.getElementById('main-clock');
 
 // Estado Global
-let isAdMode = false;
+let isAdMode = true;
 
 // ==========================================
 // SISTEMA INTELIGENTE DE AUTO-ESCALADO
@@ -39,6 +39,15 @@ setTimeout(() => {
         splashScreen.classList.add('hidden');
         if (!isAdMode) {
             scoreboard.classList.remove('hidden');
+        } else {
+            const adsContainer = document.getElementById('ads-container');
+            if (adsContainer) {
+                adsContainer.classList.remove('hidden');
+                adsContainer.style.display = 'flex';
+                if (typeof fetchAds === 'function') {
+                    fetchAds().then(() => { if (typeof playNextAd === 'function') playNextAd(); });
+                }
+            }
         }
     }, 1500);
 }, 2000);
@@ -521,3 +530,4 @@ if (appMode === 'mando') {
 }
 
 updateUI();
+
