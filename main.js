@@ -1,4 +1,4 @@
-Ôªøconst { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
@@ -65,20 +65,21 @@ async function autoDetectSerialPort() {
       return espPort.path;
     }
   
-  // Fallback al puerto del entorno o por defecto seg√∫n OS
+} catch (err) {}
+
   return process.platform === 'linux' ? '/dev/ttyUSB0' : 'COM3';
 }
 
 app.whenReady().then(async () => {
   // HDMI-CEC: Encender TV y forzar fuente HDMI
   if (process.platform === 'linux') {
-    console.log("[CEC] Enviando se√±al para encender la TV...");
+    console.log("[CEC] Enviando seÒal para encender la TV...");
     exec('echo "on 0" | cec-client -s -d 1', () => {
       exec('echo "as" | cec-client -s -d 1');
     });
   }
 
-  // Inicializar Puerto Serie con auto-detecci√≥n primero
+  // Inicializar Puerto Serie con auto-detecciÛn primero
   const portToUse = await autoDetectSerialPort();
   initSerialPort(portToUse); 
 
@@ -89,15 +90,15 @@ app.whenReady().then(async () => {
 
   ipcMain.on('trigger-sync', (event) => {
     if (globalPort && globalPort.isOpen) {
-      // Enviamos una r√°faga de 10 bytes de 155 para garantizar que la placa ESP32
-      // lo reciba incluso si se descuadr√≥ leyendo basura del inicio de Linux
+      // Enviamos una r·faga de 10 bytes de 155 para garantizar que la placa ESP32
+      // lo reciba incluso si se descuadrÛ leyendo basura del inicio de Linux
       const buf = Buffer.from([155, 155, 155, 155, 155, 155, 155, 155, 155, 155]);
       globalPort.write(buf, (err) => {
         if(err) console.log("Error enviando SYNC por Serial:", err);
       });
-      console.log(`[Virtual] -> R√°faga de Sincronizaci√≥n Enviada a la Receptora (155)`);
+      console.log(`[Virtual] -> R·faga de SincronizaciÛn Enviada a la Receptora (155)`);
     } else {
-      console.log(`[Virtual] -> Intent√≥ enviar SYNC pero el puerto est√° cerrado.`);
+      console.log(`[Virtual] -> IntentÛ enviar SYNC pero el puerto est· cerrado.`);
     }
   });
 
@@ -221,7 +222,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// L√≥gica de lectura del puerto Serie
+// LÛgica de lectura del puerto Serie
 function initSerialPort(portName) {
   try {
     // Siempre abrimos la ventana, haya o no mando.
@@ -281,19 +282,20 @@ function initSerialPort(portName) {
             if (mandoWindow) {
               mandoWindow.webContents.send('serial-command', { cmd, team, player, value });
             }
-            buffer = buffer.subarray(5); // Paquete v√°lido, avanzamos 5 bytes
+            buffer = buffer.subarray(5); // Paquete v·lido, avanzamos 5 bytes
           } else {
-            console.log(`[Hardware ESP32] ‚ö†Ô∏è ERROR: Checksum inv√°lido (Esperado: ${calculatedChecksum}, Recibido: ${checksum}). Descartando 1 byte para re-sincronizar...`);
-            buffer = buffer.subarray(1); // ¬°CLAVE! Solo avanzamos 1 byte si falla, para buscar el inicio real del pr√≥ximo paquete
+            console.log(`[Hardware ESP32] ?? ERROR: Checksum inv·lido (Esperado: ${calculatedChecksum}, Recibido: ${checksum}). Descartando 1 byte para re-sincronizar...`);
+            buffer = buffer.subarray(1); // °CLAVE! Solo avanzamos 1 byte si falla, para buscar el inicio real del prÛximo paquete
           }
         }
       });
     }
 
-    connect(); // <-- INICIO DE LA CONEXI√ìN
+    connect(); // <-- INICIO DE LA CONEXI”N
   } catch (error) {
-    console.log("Error cr√≠tico inicializando el puerto serie:", error);
+    console.log("Error crÌtico inicializando el puerto serie:", error);
   }
 }
+
 
 
