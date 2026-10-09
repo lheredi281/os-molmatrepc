@@ -3,9 +3,9 @@ const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
 
-app.disableHardwareAcceleration();
-app.commandLine.appendSwitch('disable-software-rasterizer');
-app.commandLine.appendSwitch('disable-gpu');
+// app.disableHardwareAcceleration();
+// app.commandLine.appendSwitch('disable-software-rasterizer');
+// app.commandLine.appendSwitch('disable-gpu');
 
 let mainWindow;
 let mandoWindow;
