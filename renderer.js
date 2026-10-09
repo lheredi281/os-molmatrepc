@@ -436,7 +436,7 @@ if (window.require) {
                         htmlContent += '<span class="sponsor-text">' + s.texto + '</span>';
                         htmlContent += '</span><span class="sponsor-separator"> &diams; </span>';
                     });
-                    marqText.innerHTML = htmlContent;
+                    marqText.innerHTML = htmlContent + htmlContent + htmlContent;
                 } else {
                     marqContainer.style.display = 'none';
                 }

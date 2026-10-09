@@ -281,16 +281,18 @@ body {
     overflow: hidden; white-space: nowrap; padding: 15px 0; z-index: 200;
 }
 #marquesina-text {
-    display: block; width: 100%;
+    display: inline-block; white-space: nowrap; animation: scroll 25s linear infinite; will-change: transform; text-transform: uppercase;
     color: var(--yellow-glow);
     font-size: 36px;
     font-weight: 700;
     
-    /* Usando tag HTML marquee para rendimiento en Atom */
+    
     /* text-shadow removed for fps */
 }
 @keyframes scroll {
-    0% { transform: translateX(0); }
+    0% { transform: translate3d(100vw, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
     100% { transform: translateX(-100%); }
 }
 
