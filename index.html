@@ -24,9 +24,7 @@
         <h1 id="ad-loading" style="color: white; font-family: sans-serif; font-size: 2vw;">Esperando Publicidad...</h1>
     </div>
 
-    <!-- Marquesina Informativa -->
-    <div id="marquesina-container">
-        <div id="marquesina-text"></div>
+    
     </div>
 
     <!-- Xbox-style Dashboard (Solo Mando) -->
@@ -451,13 +449,11 @@ function autoScaleTablero() {
     const targetWidth = 1920;
     const targetHeight = 1080;
     const availableWidth = window.innerWidth;
-    const availableHeight = window.innerHeight - 90; // Dejar espacio para marquesina
+    const availableHeight = window.innerHeight; // Dejar espacio para marquesina
     const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.98;
     
     // Calcular el centro exacto del espacio disponible
-    const topPosition = availableHeight / 2;
     
-    board.style.top = topPosition + 'px';
     board.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
 }
 window.addEventListener('resize', autoScaleTablero);

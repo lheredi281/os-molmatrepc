@@ -39,7 +39,7 @@ setTimeout(() => {
         splashScreen.classList.add('hidden');
         if (!isAdMode) {
             scoreboard.classList.remove('hidden');
-            document.getElementById('marquesina-container').style.display = 'block';
+            
         } else {
             const adsContainer = document.getElementById('ads-container');
             if (adsContainer) {
@@ -260,7 +260,7 @@ if (window.require) {
             adsContainer.classList.add('hidden');
             adsContainer.style.display = 'none';
             scoreboard.classList.remove('hidden');
-            document.getElementById('marquesina-container').style.display = 'block';
+            
         }
 
         // Renovar el tiempo de vida (10 segundos sin señal = Mando apagado/lejos)
@@ -269,7 +269,7 @@ if (window.require) {
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
-                document.getElementById('marquesina-container').style.display = 'none';
+                
                 adsContainer.classList.remove('hidden');
                 adsContainer.style.display = 'flex';
                 await fetchAds();
@@ -424,28 +424,7 @@ if (window.require) {
         if (navigator.onLine) {
             try {
                                                 // Traer Sponsors (Marquesina din�mica)
-                const { data: setts } = await supabase.from('system_settings').select('marquesina').eq('id', 1).single();
-                const isGlobalEnabled = !setts || setts.marquesina !== 'false';
                 
-                const { data: sponsorsData } = await supabase.from('sponsors').select('*').eq('activo', true).order('orden', { ascending: true });
-                const marqContainer = document.getElementById('marquesina-container');
-                const marqText = document.getElementById('marquesina-text');
-                
-                if (sponsorsData && sponsorsData.length > 0 && !isAdMode && isGlobalEnabled) {
-                    marqContainer.style.display = 'block';
-                    let htmlContent = '';
-                    sponsorsData.forEach(s => {
-                        htmlContent += '<span class="sponsor-item">';
-                        if (s.logo_url) {
-                            htmlContent += '<img src="' + s.logo_url + '" class="sponsor-logo" /> ';
-                        }
-                        htmlContent += '<span class="sponsor-text">' + s.texto + '</span>';
-                        htmlContent += '</span><span class="sponsor-separator"> &diams; </span>';
-                    });
-                    marqText.innerHTML = htmlContent + htmlContent + htmlContent;
-                } else {
-                    marqContainer.style.display = 'none';
-                }
 
                 // Traer Publicidades
                 const { data, error } = await supabase
@@ -546,7 +525,7 @@ if (window.require) {
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
-                document.getElementById('marquesina-container').style.display = 'none';
+                
                 adsContainer.classList.remove('hidden');
                 adsContainer.style.display = 'flex';
                 await fetchAds();
@@ -560,28 +539,7 @@ if (window.require) {
     setInterval(async () => {
         if (navigator.onLine) {
             try {
-                const { data: setts } = await supabase.from('system_settings').select('marquesina').eq('id', 1).single();
-                const isGlobalEnabled = !setts || setts.marquesina !== 'false';
                 
-                const { data: sponsorsData } = await supabase.from('sponsors').select('*').eq('activo', true).order('orden', { ascending: true });
-                const marqContainer = document.getElementById('marquesina-container');
-                const marqText = document.getElementById('marquesina-text');
-                
-                if (sponsorsData && sponsorsData.length > 0 && !isAdMode && isGlobalEnabled) {
-                    marqContainer.style.display = 'block';
-                    let htmlContent = '';
-                    sponsorsData.forEach(s => {
-                        htmlContent += '<span class="sponsor-item">';
-                        if (s.logo_url) {
-                            htmlContent += '<img src="' + s.logo_url + '" class="sponsor-logo" /> ';
-                        }
-                        htmlContent += '<span class="sponsor-text">' + s.texto + '</span>';
-                        htmlContent += '</span><span class="sponsor-separator"> ♦ </span>';
-                    });
-                    marqText.innerHTML = htmlContent + htmlContent + htmlContent;
-                } else {
-                    marqContainer.style.display = 'none';
-                }
             } catch(e){}
         }
     }, 30000);
