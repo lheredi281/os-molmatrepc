@@ -451,11 +451,14 @@ function autoScaleTablero() {
     const targetWidth = 1920;
     const targetHeight = 1080;
     const availableWidth = window.innerWidth;
-    const availableHeight = window.innerHeight - 80; // Dejar 80px para marquesina
-    const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.95;
+    const availableHeight = window.innerHeight - 90; // Dejar espacio para marquesina
+    const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.98;
     
-    // Centrar con transform y un pequeño ajuste vertical
-    board.style.transform = 'translate(-50%, calc(-50% - 30px)) scale(' + scale + ')';
+    // Calcular el centro exacto del espacio disponible
+    const topPosition = availableHeight / 2;
+    
+    board.style.top = topPosition + 'px';
+    board.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
 }
 window.addEventListener('resize', autoScaleTablero);
 setTimeout(autoScaleTablero, 100);
