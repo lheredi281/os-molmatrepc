@@ -74,7 +74,7 @@ body {
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    padding: 20px 40px;
+    padding: 15px 30px;
     background: radial-gradient(circle at center, #0f172a 0%, #000000 100%);
     overflow: hidden;
 }
@@ -97,13 +97,13 @@ body {
 
 /* Row 1: Clock */
 .clock-box {
-    padding: 20px 80px;
+    padding: 15px 50px;
     background: #000000;
     border-radius: 20px;
     border: none;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
-.large-clock { font-size: 280px; line-height: 1; letter-spacing: -4px; color: #ffffff !important; text-shadow: 0 0 30px rgba(255,255,255,0.8); }
+.large-clock { font-size: 210px; line-height: 1; letter-spacing: -4px; color: #ffffff !important; text-shadow: 0 0 30px rgba(255,255,255,0.8); }
 
 /* Row 2: Scores */
 .scores-row {
@@ -121,36 +121,36 @@ body {
 }
 
 .team-name {
-    font-size: 70px; line-height: 1;
+    font-size: 55px; line-height: 1;
     font-weight: 900;
     letter-spacing: 5px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: #ffffff !important;
     text-transform: uppercase;
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
-    padding: 15px 40px;
+    padding: 5px 20px;
     border: 2px solid #334155;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
 .score-wrapper {
-    padding: 25px 60px;
+    padding: 15px 40px;
     width: 100%;
     text-align: center;
     border-radius: 20px;
 }
 
-.huge-score { font-size: 380px; line-height: 1; letter-spacing: -10px; color: #ff0000 !important; text-shadow: 0 0 30px rgba(255,0,0,0.6); }
-.huge-score.triple-digit { font-size: 260px; line-height: 1; }
+.huge-score { font-size: 280px; line-height: 1; letter-spacing: -10px; color: #ff0000 !important; text-shadow: 0 0 30px rgba(255,0,0,0.6); }
+.huge-score.triple-digit { font-size: 200px; line-height: 1; }
 
 .period-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px 40px;
+    padding: 15px 30px;
     width: 380px;
     background: rgba(15, 23, 42, 0.8) !important;
     backdrop-filter: blur(10px);
@@ -159,28 +159,28 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
 }
 .label {
-    font-size: 38px; line-height: 1;
+    font-size: 24px; line-height: 1;
     color: #94a3b8 !important;
     font-weight: 900;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 .period-wrapper .glow-yellow { color: #ffcc00 !important; text-shadow: 0 0 20px rgba(255,204,0,0.5); }
-.medium-score { font-size: 180px; line-height: 1; }
+.medium-score { font-size: 90px; line-height: 1; }
 
 .shot-clock-container { 
-    margin-top: 25px; 
+    margin-top: 15px; 
     text-align: center; 
     background: #000000;
-    padding: 15px;
+    padding: 10px;
     border-radius: 15px;
     border: 3px solid #ff0000;
     box-shadow: 0 0 20px rgba(255,0,0,0.3);
     width: 100%;
 }
-.shot-clock-container .label { color: #ff4444 !important; font-size: 30px; margin-bottom: 5px; }
-.shot-clock-container .digital-number { color: #ff0000 !important; font-size: 160px; text-shadow: 0 0 20px rgba(255,0,0,0.8); }
+.shot-clock-container .label { color: #ff4444 !important; font-size: 24px; margin-bottom: 5px; }
+.shot-clock-container .digital-number { color: #ff0000 !important; font-size: 120px; text-shadow: 0 0 20px rgba(255,0,0,0.8); }
 
 /* Row 3: Stats */
 .team-stats-row {
@@ -194,9 +194,9 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 60px;
+    padding: 15px 40px;
     width: 800px;
-    gap: 40px;
+    gap: 30px;
     background: rgba(15, 23, 42, 0.7);
     border: 2px solid #334155;
     border-radius: 20px;
@@ -204,23 +204,23 @@ body {
 }
 
 .foul-section { display: flex; flex-direction: column; align-items: center;}
-.foul-section .label { color: #94a3b8 !important; font-size: 38px; margin-bottom: 10px; }
+.foul-section .label { color: #94a3b8 !important; font-size: 24px; margin-bottom: 10px; }
 .foul-section .small-score {
     background: #000000;
     color: #ffcc00 !important;
-    padding: 10px 30px;
+    padding: 5px 20px;
     border-radius: 10px;
     border: 2px solid #334155;
     text-shadow: 0 0 15px rgba(255,204,0,0.5);
-    font-size: 130px; line-height: 1;
+    font-size: 90px; line-height: 1;
 }
 
 .bonus-indicator {
-    font-size: 32px; line-height: 1;
+    font-size: 24px; line-height: 1;
     font-weight: 900;
     color: #475569;
     background: #0f172a;
-    padding: 10px 30px;
+    padding: 5px 20px;
     border-radius: 10px;
     letter-spacing: 3px;
     transition: all 0.3s;
@@ -233,9 +233,9 @@ body {
     box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
 }
 
-.timeouts { display: flex; gap: 15px; }
+.timeouts { display: flex; gap: 10px; }
 .to-led {
-    width: 40px; height: 40px;
+    width: 30px; height: 30px;
     border-radius: 50%;
     background: #0f172a;
     border: 2px solid #334155;
