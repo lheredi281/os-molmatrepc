@@ -55,8 +55,8 @@ setTimeout(() => {
 // ==========================================
 // ESTADO DEL PARTIDO (Reglas FIBA)
 // ==========================================
-let savedState = localStorage.getItem('tablero_state');
-let state = savedState ? JSON.parse(savedState) : {
+let savedStateStr = localStorage.getItem('tablero_state');
+let state = {
     score: { local: 0, visita: 0 },
     team_fouls: { local: 0, visita: 0 },
     clock: 600, // 10 minutos
@@ -64,7 +64,17 @@ let state = savedState ? JSON.parse(savedState) : {
     period: 1,
     shot_clock: 24
 };
-// Siempre iniciar con el reloj pausado, sin importar cmo se guard
+
+try {
+    if (savedStateStr) {
+        let parsed = JSON.parse(savedStateStr);
+        if (parsed.score) state.score = parsed.score;
+        if (parsed.team_fouls) state.team_fouls = parsed.team_fouls;
+        if (parsed.clock !== undefined) state.clock = parsed.clock;
+        if (parsed.period !== undefined) state.period = parsed.period;
+        if (parsed.shot_clock !== undefined) state.shot_clock = parsed.shot_clock;
+    }
+} catch(e) {}
 state.clock_running = false;
 
 // Persistir el estado cada 1 segundo (Para evitar prdida de datos si hay reinicios o cortes de luz)
@@ -542,5 +552,6 @@ if (appMode === 'mando') {
 }
 
 updateUI();
+
 
 
