@@ -39,6 +39,7 @@ setTimeout(() => {
         splashScreen.classList.add('hidden');
         if (!isAdMode) {
             scoreboard.classList.remove('hidden');
+            document.getElementById('marquesina-container').style.display = 'block';
         } else {
             const adsContainer = document.getElementById('ads-container');
             if (adsContainer) {
@@ -259,6 +260,7 @@ if (window.require) {
             adsContainer.classList.add('hidden');
             adsContainer.style.display = 'none';
             scoreboard.classList.remove('hidden');
+            document.getElementById('marquesina-container').style.display = 'block';
         }
 
         // Renovar el tiempo de vida (10 segundos sin señal = Mando apagado/lejos)
@@ -267,6 +269,7 @@ if (window.require) {
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
+                document.getElementById('marquesina-container').style.display = 'none';
                 adsContainer.classList.remove('hidden');
                 adsContainer.style.display = 'flex';
                 await fetchAds();
@@ -425,7 +428,7 @@ if (window.require) {
                 const marqContainer = document.getElementById('marquesina-container');
                 const marqText = document.getElementById('marquesina-text');
                 
-                if (sponsorsData && sponsorsData.length > 0) {
+                if (sponsorsData && sponsorsData.length > 0 && !isAdMode) {
                     marqContainer.style.display = 'block';
                     let htmlContent = '';
                     sponsorsData.forEach(s => {
@@ -540,6 +543,7 @@ if (window.require) {
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
+                document.getElementById('marquesina-container').style.display = 'none';
                 adsContainer.classList.remove('hidden');
                 adsContainer.style.display = 'flex';
                 await fetchAds();
