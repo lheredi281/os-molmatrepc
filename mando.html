@@ -358,17 +358,18 @@
 
         let isEditMode = false;
         
-        function handleStartStop() {
+        function handleStart() {
             if (isEditMode) {
-                // RESET TOTAL DEL PARTIDO
                 if(confirm('¿Seguro que deseas RESETEAR EL PARTIDO a 0?')) {
                     sendCmd(9, 0, 0, 0);
-                    toggleEditMode(); // Auto-lock again
+                    toggleEditMode();
                 }
             } else {
-                // INICIAR / PAUSAR RELOJ
-                sendCmd(4, 0, 0, 0);
+                sendCmd(12, 0, 0, 0); // Explicit START
             }
+        }
+        function handleStop() {
+            sendCmd(13, 0, 0, 0); // Explicit STOP
         }
 
         function handleSync() {

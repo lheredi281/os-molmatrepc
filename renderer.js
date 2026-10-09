@@ -307,10 +307,10 @@ if (window.require) {
             case 4: // Iniciar/Detener Reloj (Toggle legacy)
                 toggleClock();
                 break;
-            case 10: // Explicit START
+            case 12: // Explicit START
                 if (!state.clock_running) toggleClock();
                 break;
-            case 11: // Explicit STOP
+            case 13: // Explicit STOP
                 if (state.clock_running) toggleClock();
                 break;
                 
