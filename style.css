@@ -77,7 +77,7 @@ body {
     box-shadow: 0 0 20px var(--yellow-glow);
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.splash h1 { font-size: 6.5vh; line-height: 1; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+.splash h1 { font-size: 8.5vh; line-height: 1; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
 .splash p { font-size: 2.2vh; line-height: 1; margin-top: 20px; color: var(--label-color); font-weight: 400; letter-spacing: 2px;}
 
 .hidden { opacity: 0; pointer-events: none; display: none !important; }
@@ -90,7 +90,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 3vh;
+    padding: 1vh;
 }
 
 /* Glassmorphism Panels */
@@ -113,20 +113,20 @@ body {
 
 /* Clock Box */
 .clock-box {
-    padding: 2vh 5vh;
+    padding: 1vh 4vh;
     border-bottom: 0.4vh solid var(--red-glow);
     transition: transform 0.2s;
 }
 .clock-box:hover { transform: scale(1.02); }
-.large-clock { font-size: 30vh; line-height: 1; letter-spacing: -5px; }
+.large-clock { font-size: 38vh; line-height: 1; letter-spacing: -5px; }
 
 /* Scores */
 .scores-row {
     display: flex;
-    width: 100%;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    padding: 0 50px;
+    width: 96vw;
+    margin-top: 2vh;
 }
 
 .score-column {
@@ -137,17 +137,17 @@ body {
 }
 
 .team-name {
-    font-size: 6.5vh; line-height: 1;
+    font-size: 8.5vh; line-height: 1;
     font-weight: 900;
     letter-spacing: 6px;
-    margin-bottom: 2vh;
+    margin-bottom: 1vh;
     color: #cbd5e1;
     text-transform: uppercase;
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
 }
 
 .score-wrapper {
-    padding: 2vh 4vh;
+    padding: 1vh 3vh;
     width: 100%;
     text-align: center;
     position: relative;
@@ -164,8 +164,8 @@ body {
     z-index: 1;
 }
 
-.huge-score { font-size: 35vh; line-height: 1; transition: font-size 0.3s, transform 0.1s; letter-spacing: -10px;}
-.huge-score.triple-digit { font-size: 26vh; line-height: 1; }
+.huge-score { font-size: 45vh; line-height: 1; transition: font-size 0.3s, transform 0.1s; letter-spacing: -10px;}
+.huge-score.triple-digit { font-size: 32vh; line-height: 1; }
 
 /* Period and Shot Clock */
 .period-wrapper {
@@ -177,14 +177,14 @@ body {
     min-width: 250px;
 }
 .label {
-    font-size: 3.2vh; line-height: 1;
+    font-size: 4.5vh; line-height: 1;
     color: var(--label-color);
     font-weight: 700;
     letter-spacing: 4px;
     text-transform: uppercase;
     margin-bottom: 1vh;
 }
-.medium-score { font-size: 16vh; line-height: 1; }
+.medium-score { font-size: 24vh; line-height: 1; }
 .shot-clock-container { margin-top: 3vh; text-align: center; }
 
 /* Team Stats (Fouls & Timeouts) */
@@ -201,13 +201,13 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 2vh 4vh;
+    padding: 1vh 3vh;
     width: 42%;
     gap: 30px;
 }
 
 .foul-section { display: flex; flex-direction: column; align-items: center;}
-.small-score { font-size: 12vh; line-height: 1; }
+.small-score { font-size: 18vh; line-height: 1; }
 
 .bonus-indicator {
     font-size: 2.5vh; line-height: 1;
@@ -287,7 +287,7 @@ body {
 }
 .sponsor-separator {
     color: #38bdf8;
-    margin: 0 4vh;
+    margin: 0 1vw;
     font-size: 2.2vh; line-height: 1;
 }
 
