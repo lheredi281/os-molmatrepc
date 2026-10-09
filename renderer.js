@@ -397,7 +397,7 @@ if (window.require) {
             }
                 
             default:
-                console.log("Comando de Hardware desconocido:", cmd);
+                // console.log('Comando desconocido:', cmd);
                 break;
         }
         

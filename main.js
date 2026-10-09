@@ -287,7 +287,7 @@ function initSerialPort(portName) {
           const calculatedChecksum = (cmd + team + player + value) & 0xFF;
           
           if (checksum === calculatedChecksum) {
-            console.log(`[Hardware ESP32] Comando Recibido -> CMD: ${cmd} | EQUIPO: ${team} | JUGADOR: ${player} | VALOR: ${value}`);
+            // console.log(`[Hardware ESP32] Comando Recibido -> CMD: ${cmd} | EQUIPO: ${team} | JUGADOR: ${player} | VALOR: ${value}`); // Muted to improve performance and reduce latency
             
             if (mainWindow) {
               // Mandar los datos estructurados al Frontend
