@@ -278,12 +278,12 @@ body {
     background: #0f172a; /* solid color for better fps */
     /* backdrop-filter removed for fps */
     border-top: 2px solid var(--panel-border);
-    overflow: hidden; white-space: nowrap; padding: 15px 0; z-index: 200;
+    overflow: hidden; white-space: nowrap; padding: 8px 0; z-index: 200;
 }
 #marquesina-text {
-    display: inline-block; white-space: nowrap; animation: scroll 25s linear infinite; will-change: transform; text-transform: uppercase;
+    display: inline-block; white-space: nowrap; animation: scroll 40s linear infinite; will-change: transform; text-transform: uppercase;
     color: var(--yellow-glow);
-    font-size: 36px;
+    font-size: 24px;
     font-weight: 700;
     
     
