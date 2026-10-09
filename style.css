@@ -77,8 +77,8 @@ body {
     box-shadow: 0 0 20px var(--yellow-glow);
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.splash h1 { font-size: 70px; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
-.splash p { font-size: 24px; margin-top: 20px; color: var(--label-color); font-weight: 400; letter-spacing: 2px;}
+.splash h1 { font-size: 6.5vh; line-height: 1; letter-spacing: 8px; font-weight: 900; text-transform: uppercase; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;}
+.splash p { font-size: 2.2vh; line-height: 1; margin-top: 20px; color: var(--label-color); font-weight: 400; letter-spacing: 2px;}
 
 .hidden { opacity: 0; pointer-events: none; display: none !important; }
 
@@ -86,12 +86,11 @@ body {
 .scoreboard {
     position: absolute;
     top: 50%; left: 50%;
-    width: 1920px; height: 1080px;
-    transform: translate(-50%, -50%);
+    width: 100vw; height: 100vh; transform: none;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 40px;
+    padding: 3vh;
 }
 
 /* Glassmorphism Panels */
@@ -99,7 +98,7 @@ body {
     background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
     border: 2px solid #334155;
     border-top: 2px solid #475569;
-    border-radius: 24px;
+    border-radius: 2vh;
     box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.05);
 }
 
@@ -114,12 +113,12 @@ body {
 
 /* Clock Box */
 .clock-box {
-    padding: 20px 60px;
-    border-bottom: 4px solid var(--red-glow);
+    padding: 2vh 5vh;
+    border-bottom: 0.4vh solid var(--red-glow);
     transition: transform 0.2s;
 }
 .clock-box:hover { transform: scale(1.02); }
-.large-clock { font-size: 320px; letter-spacing: -5px; }
+.large-clock { font-size: 30vh; line-height: 1; letter-spacing: -5px; }
 
 /* Scores */
 .scores-row {
@@ -138,17 +137,17 @@ body {
 }
 
 .team-name {
-    font-size: 70px;
+    font-size: 6.5vh; line-height: 1;
     font-weight: 900;
     letter-spacing: 6px;
-    margin-bottom: 20px;
+    margin-bottom: 2vh;
     color: #cbd5e1;
     text-transform: uppercase;
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
 }
 
 .score-wrapper {
-    padding: 20px 40px;
+    padding: 2vh 4vh;
     width: 100%;
     text-align: center;
     position: relative;
@@ -165,8 +164,8 @@ body {
     z-index: 1;
 }
 
-.huge-score { font-size: 380px; transition: font-size 0.3s, transform 0.1s; letter-spacing: -10px;}
-.huge-score.triple-digit { font-size: 280px; }
+.huge-score { font-size: 35vh; line-height: 1; transition: font-size 0.3s, transform 0.1s; letter-spacing: -10px;}
+.huge-score.triple-digit { font-size: 26vh; line-height: 1; }
 
 /* Period and Shot Clock */
 .period-wrapper {
@@ -178,15 +177,15 @@ body {
     min-width: 250px;
 }
 .label {
-    font-size: 35px;
+    font-size: 3.2vh; line-height: 1;
     color: var(--label-color);
     font-weight: 700;
     letter-spacing: 4px;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 1vh;
 }
-.medium-score { font-size: 180px; }
-.shot-clock-container { margin-top: 30px; text-align: center; }
+.medium-score { font-size: 16vh; line-height: 1; }
+.shot-clock-container { margin-top: 3vh; text-align: center; }
 
 /* Team Stats (Fouls & Timeouts) */
 .team-stats-row {
@@ -202,20 +201,20 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 40px;
+    padding: 2vh 4vh;
     width: 42%;
     gap: 30px;
 }
 
 .foul-section { display: flex; flex-direction: column; align-items: center;}
-.small-score { font-size: 130px; }
+.small-score { font-size: 12vh; line-height: 1; }
 
 .bonus-indicator {
-    font-size: 28px;
+    font-size: 2.5vh; line-height: 1;
     font-weight: 900;
     color: #475569;
     background: #0f172a;
-    padding: 10px 30px;
+    padding: 1vh 3vh;
     border-radius: 8px;
     letter-spacing: 5px;
     transition: all 0.3s;
@@ -288,7 +287,7 @@ body {
 }
 .sponsor-separator {
     color: #38bdf8;
-    margin: 0 40px;
-    font-size: 24px;
+    margin: 0 4vh;
+    font-size: 2.2vh; line-height: 1;
 }
 

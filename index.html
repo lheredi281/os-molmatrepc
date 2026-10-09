@@ -442,29 +442,7 @@
             };
         }
     </script>
-<script>
-function autoScaleTablero() {
-    const board = document.querySelector('.scoreboard');
-    if (!board) return;
-    const targetWidth = 1920;
-    const targetHeight = 1080;
-    const availableWidth = window.innerWidth;
-    const availableHeight = window.innerHeight; // Dejar espacio para marquesina
-    const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.98;
-    
-    // Calcular el centro exacto del espacio disponible
-    
-    
-    board.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
-    board.style.transformOrigin = 'center center';
-    // Fix text blurriness on scaling
-    board.style.backfaceVisibility = 'hidden';
 
-}
-window.addEventListener('resize', autoScaleTablero);
-setTimeout(autoScaleTablero, 100);
-setInterval(autoScaleTablero, 2000);
-</script>
 </body>
 </html>
 
