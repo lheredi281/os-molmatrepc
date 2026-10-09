@@ -2,449 +2,335 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consola Física FIBA</title>
+    <title>Consola Táctil FIBA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #000;
-            --panel-bg: #1e2124;
-            --plate-border: #3a3f44;
-            --btn-green: radial-gradient(circle at 30% 30%, #4ade80, #16a34a);
-            --btn-green-base: #14532d;
-            --btn-blue: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb);
-            --btn-blue-base: #1e3a8a;
-            --btn-red: radial-gradient(circle at 30% 30%, #f87171, #dc2626);
-            --btn-red-base: #7f1d1d;
-            --btn-yellow: radial-gradient(circle at 30% 30%, #fde047, #eab308);
-            --btn-yellow-base: #854d0e;
-            --btn-black: radial-gradient(circle at 30% 30%, #475569, #1e293b);
-            --btn-black-base: #0f172a;
+            --bg-base: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --border-light: rgba(255, 255, 255, 0.1);
+            
+            --green-btn: linear-gradient(145deg, #22c55e, #16a34a);
+            --green-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            
+            --blue-btn: linear-gradient(145deg, #3b82f6, #2563eb);
+            --blue-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            
+            --red-btn: linear-gradient(145deg, #ef4444, #dc2626);
+            --red-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            
+            --yellow-btn: linear-gradient(145deg, #facc15, #ca8a04);
+            --yellow-shadow: 0 4px 20px rgba(234, 179, 8, 0.5);
+            
+            --dark-btn: linear-gradient(145deg, #334155, #1e293b);
+            --dark-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            
+            --purple-btn: linear-gradient(145deg, #a855f7, #7e22ce);
+            --purple-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
         body {
-            background-color: var(--bg-color);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
-            height: 100vh;
-            width: 100vw;
-            user-select: none;
+            background-color: var(--bg-base);
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, #0f172a 80%);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: stretch;
+            padding: 20px;
             overflow: hidden;
         }
 
-        .chassis {
-            background: #2b2d31;
-            padding: 20px;
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            border: 5px solid #111;
-            box-shadow: inset 0 2px 5px rgba(255,255,255,0.1);
+        .dashboard {
+            width: 100%; height: 100%;
+            display: flex; gap: 20px;
         }
 
-        .plate {
+        /* Glass Panels */
+        .panel {
             background: var(--panel-bg);
-            border: 2px solid var(--plate-border);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            height: 100%;
-            box-sizing: border-box;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 24px;
+            padding: 25px;
+            display: flex; flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        .panel.side { flex: 1; }
+        .panel.center { flex: 1.5; }
 
-        .plate.center {
-            flex: 1.5; 
-            justify-content: flex-start;
-            align-items: center;
-        }
-
-        .plate.side {
-            align-items: center;
-        }
-
-        .plate-title {
-            background: #111;
-            padding: 5px 20px;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            color: #94a3b8;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-            width: 100%;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        /* Contenedor de equipo (Local / Visita) */
-        .team-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            width: 100%;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .team-row {
-            display: flex;
-            justify-content: space-evenly;
-            width: 100%;
-        }
-
-        .btn-module {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .module-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #cbd5e1;
+        .panel-header {
+            text-align: center; font-size: 22px; font-weight: 800;
+            letter-spacing: 4px; padding-bottom: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-light);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            background: #111;
-            padding: 4px 10px;
-            border-radius: 3px;
-            border: 1px solid #333;
-            text-align: center;
-            white-space: nowrap;
         }
+        .header-local { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,0.5); }
+        .header-visita { color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.5); }
+        .header-mesa { color: #f8fafc; }
 
-        .push-button {
-            width: 70px;
-            height: 70px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            transition: 0.05s;
-            position: relative;
-            outline: none;
-        }
-
-        .push-button.green {
-            background: var(--btn-green);
-            box-shadow: 0 8px 0 var(--btn-green-base), 0 12px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-        .push-button.green:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--btn-green-base), 0 4px 5px rgba(0,0,0,0.5), inset 0 4px 8px rgba(0,0,0,0.6); }
-
-        .push-button.blue {
-            background: var(--btn-blue);
-            box-shadow: 0 8px 0 var(--btn-blue-base), 0 12px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-        .push-button.blue:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--btn-blue-base), 0 4px 5px rgba(0,0,0,0.5), inset 0 4px 8px rgba(0,0,0,0.6); }
-
-        .push-button.red {
-            background: var(--btn-red);
-            box-shadow: 0 8px 0 var(--btn-red-base), 0 12px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-        .push-button.red:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--btn-red-base), 0 4px 5px rgba(0,0,0,0.5), inset 0 4px 8px rgba(0,0,0,0.6); }
-
-        .push-button.black {
-            background: var(--btn-black);
-            box-shadow: 0 8px 0 var(--btn-black-base), 0 12px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.2);
-        }
-        .push-button.black:active { transform: translateY(8px); box-shadow: 0 0px 0 var(--btn-black-base), 0 4px 5px rgba(0,0,0,0.5), inset 0 4px 8px rgba(0,0,0,0.6); }
-
-        .push-button.yellow.huge {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: var(--btn-yellow);
-            box-shadow: 0 10px 0 var(--btn-yellow-base), 0 15px 20px rgba(0,0,0,0.6), inset 0 3px 6px rgba(255,255,255,0.5);
-            display: flex;
+        /* Buttons Structure */
+        .btn-grid {
+            display: flex; flex-direction: column; gap: 20px; flex: 1;
             justify-content: center;
-            align-items: center;
         }
-        .push-button.yellow.huge:active { transform: translateY(10px); box-shadow: 0 0px 0 var(--btn-yellow-base), 0 5px 10px rgba(0,0,0,0.6), inset 0 5px 10px rgba(0,0,0,0.7); }
-
-        .push-button.rect {
-            width: 90px;
-            height: 50px;
-        }
-        .push-button.rect.wide {
-            width: 140px;
+        .row { display: flex; justify-content: space-evenly; gap: 15px; width: 100%; }
+        
+        .control-group {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
 
-        .time-group {
-            opacity: 0.3;
-            pointer-events: none;
-            transition: 0.3s;
-            border: 2px dashed #334155;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            width: 100%;
-            box-sizing: border-box;
-            background: rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        body.edit-mode .time-group {
-            opacity: 1;
-            pointer-events: auto;
-            border-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.05);
+        .label {
+            font-size: 12px; font-weight: 600; color: #94a3b8;
+            letter-spacing: 1px; text-transform: uppercase;
         }
 
-        .push-button.purple {
-            background: radial-gradient(circle at 30% 30%, #a855f7, #7e22ce);
-            box-shadow: 0 8px 0 #4c1d95, 0 12px 15px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
-        .push-button.purple:active, .push-button.purple.active-lock {
-            transform: translateY(8px);
-            box-shadow: 0 0px 0 #4c1d95, 0 4px 5px rgba(0,0,0,0.5), inset 0 4px 8px rgba(0,0,0,0.6);
-        }
-
-        .center-group {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            justify-content: space-evenly;
-            flex: 1;
+        /* Modern Buttons */
+        button {
+            border: none; outline: none; cursor: pointer;
+            border-radius: 16px;
+            color: white; font-weight: 800; font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.2s;
+            position: relative; overflow: hidden;
         }
         
-        .horizontal-section {
-            display: flex;
-            justify-content: space-evenly;
-            width: 100%;
-            align-items: flex-end;
+        button::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(255,255,255,0.1), transparent);
+            border-radius: 16px; pointer-events: none;
         }
 
-        /* LED de Sincronización */
-        .led-indicator {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background-color: #333;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5);
-            margin: 0 auto 5px auto;
-            transition: 0.3s all ease;
+        button:active {
+            transform: scale(0.95);
+            filter: brightness(0.9);
         }
 
-        .led-indicator.blinking {
-            animation: ledBlink 0.3s infinite alternate;
+        /* Button Colors */
+        .btn-green { background: var(--green-btn); box-shadow: var(--green-shadow); border: 1px solid #4ade80; }
+        .btn-blue { background: var(--blue-btn); box-shadow: var(--blue-shadow); border: 1px solid #60a5fa; }
+        .btn-red { background: var(--red-btn); box-shadow: var(--red-shadow); border: 1px solid #f87171; }
+        .btn-yellow { background: var(--yellow-btn); box-shadow: var(--yellow-shadow); border: 1px solid #fde047; color: #1c1917;}
+        .btn-dark { background: var(--dark-btn); box-shadow: var(--dark-shadow); border: 1px solid #475569; }
+        .btn-purple { background: var(--purple-btn); box-shadow: var(--purple-shadow); border: 1px solid #c084fc; }
+
+        /* Sizes */
+        .btn-square { width: 80px; height: 80px; }
+        .btn-rect { width: 100px; height: 60px; font-size: 18px; }
+        .btn-wide { width: 140px; height: 60px; font-size: 18px; }
+        .btn-huge { width: 120px; height: 120px; border-radius: 50%; font-size: 40px; }
+        .btn-huge::after { border-radius: 50%; }
+
+        /* Icons SVG */
+        svg { width: 32px; height: 32px; fill: currentColor; }
+        .btn-huge svg { width: 50px; height: 50px; }
+
+        /* Center Dashboard specific */
+        .center-dashboard { display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
+        
+        .time-box {
+            background: rgba(0,0,0,0.3); border: 1px solid #334155;
+            border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; gap: 15px;
+            opacity: 0.4; pointer-events: none; transition: all 0.3s ease;
+        }
+        body.edit-mode .time-box {
+            opacity: 1; pointer-events: auto;
+            border-color: #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
         }
 
-        .led-indicator.green {
-            background-color: #4ade80;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 0 10px #4ade80, 0 0 20px #4ade80;
+        .status-bar {
+            background: #0f172a; border-radius: 12px; padding: 10px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #1e293b; margin-top: auto;
         }
-
-        .led-indicator.red {
-            background-color: #f87171;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4), 0 0 10px #f87171, 0 0 20px #f87171;
-        }
-
-        @keyframes ledBlink {
-            0% { background-color: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
-            100% { background-color: #1e3a8a; box-shadow: none; }
-        }
-
-        /* Detalles visuales */
-        .divider {
-            width: 100%;
-            height: 2px;
-            background: #333;
-            border-bottom: 1px solid #555;
-            margin: 15px 0;
-        }
+        
+        .led { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444; transition: 0.3s; }
+        .led.green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .led.yellow { background: #facc15; box-shadow: 0 0 8px #facc15; }
+        
+        .status-text { font-family: 'Share Tech Mono', monospace; color: #38bdf8; font-size: 18px; }
 
     </style>
 </head>
 <body>
 
-    <div class="chassis">
+    <div class="dashboard">
         
-        <!-- =================== LOCAL =================== -->
-        <div class="plate side">
-            <div class="plate-title" style="color: #4ade80;">LOCAL</div>
-            
-            <div class="team-grid">
-                <!-- Fila 1: Puntos -->
-                <div class="team-row">
-                    <div class="btn-module">
-                        <span class="module-label">+1 PTS</span>
-                        <button class="push-button green" onclick="sendCmd(1, 1, 0, 1)"></button>
+        <!-- LOCAL PANEL -->
+        <div class="panel side">
+            <div class="panel-header header-local">LOCAL</div>
+            <div class="btn-grid">
+                <!-- Puntos -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label">+1 PTS</span>
+                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 1)">+1</button>
                     </div>
-                    <div class="btn-module">
-                        <span class="module-label">+2 PTS</span>
-                        <button class="push-button green" onclick="sendCmd(1, 1, 0, 2)"></button>
+                    <div class="control-group">
+                        <span class="label">+2 PTS</span>
+                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 2)">+2</button>
                     </div>
-                    <div class="btn-module">
-                        <span class="module-label">+3 PTS</span>
-                        <button class="push-button green" onclick="sendCmd(1, 1, 0, 3)"></button>
-                    </div>
-                </div>
-
-                <!-- Fila 2: Corrección Puntos -->
-                <div class="team-row" style="justify-content: center;">
-                    <div class="btn-module">
-                        <span class="module-label">-1 PUNTO</span>
-                        <button class="push-button black rect wide" onclick="sendCmd(1, 1, 0, 255)"></button>
+                    <div class="control-group">
+                        <span class="label">+3 PTS</span>
+                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 3)">+3</button>
                     </div>
                 </div>
-
-                <div class="divider"></div>
-
-                <!-- Fila 3: Faltas -->
-                <div class="team-row">
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #f87171;">+ FALTA</span>
-                        <button class="push-button red" onclick="sendCmd(3, 1, 0, 1)"></button>
-                    </div>
-                    <div class="btn-module">
-                        <span class="module-label">- FALTA</span>
-                        <button class="push-button black" onclick="sendCmd(3, 1, 0, 255)"></button>
+                <!-- Correccion Puntos -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label">CORREGIR PUNTO</span>
+                        <button class="btn-wide btn-dark" onclick="sendCmd(1, 1, 0, 255)">-1</button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- =================== SISTEMA =================== -->
-        <div class="plate center">
-            <div class="plate-title">MESA DE CONTROL</div>
-            
-            <div class="center-group">
                 
-                <!-- Fila Superior: Reloj -->
-                <div class="horizontal-section" style="align-items: center;">
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #a855f7;">[T] COMANDO</span>
-                        <button class="push-button purple rect" id="btn-comando" style="height: 60px;" onclick="toggleEditMode()">
-                            <span style="color:white; font-weight:bold; font-size:12px;">EDITAR</span>
-                        </button>
+                <div style="height: 1px; background: var(--border-light); margin: 10px 0;"></div>
+                
+                <!-- Faltas -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label" style="color: #f87171;">FALTA</span>
+                        <button class="btn-square btn-red" onclick="sendCmd(3, 1, 0, 1)">+1</button>
                     </div>
-
-                    <div class="btn-module">
-                        <span class="module-label" style="font-size: 16px; color:#fde047; padding: 5px 15px;">START / STOP</span>
-                        <button class="push-button yellow huge" onclick="handleStartStop()">
-                            <div style="width: 35px; height: 35px; background: #854d0e; clip-path: polygon(0 0, 100% 50%, 0 100%);"></div>
-                        </button>
-                        <span class="module-label" style="font-size: 10px; color:#a855f7; border:none; background:none; margin-top:5px;">+ COMANDO = RESET</span>
-                    </div>
-
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #f87171;">BOCINA</span>
-                        <button class="push-button red rect" style="height: 60px;" onclick="sendCmd(6, 0, 0, 0)"></button>
+                    <div class="control-group">
+                        <span class="label">CORREGIR</span>
+                        <button class="btn-square btn-dark" onclick="sendCmd(3, 1, 0, 255)">-1</button>
                     </div>
                 </div>
-
-                <!-- Grupo de Tiempo (Requiere Desbloqueo) -->
-                <div class="time-group">
-                    <div class="horizontal-section">
-                        <div class="btn-module">
-                            <span class="module-label">1 MIN</span>
-                            <button class="push-button black rect" onclick="sendCmd(7, 1, 0, 0)"></button>
-                        </div>
-                        <div class="btn-module">
-                            <span class="module-label">5 MIN</span>
-                            <button class="push-button black rect" onclick="sendCmd(7, 5, 0, 0)"></button>
-                        </div>
-                        <div class="btn-module">
-                            <span class="module-label">10 MIN</span>
-                            <button class="push-button black rect" onclick="sendCmd(7, 10, 0, 0)"></button>
-                        </div>
-                    </div>
-
-                    <div class="horizontal-section" style="padding: 0 40px;">
-                        <div class="btn-module">
-                            <span class="module-label">+1 MINUTO</span>
-                            <button class="push-button black rect" onclick="sendCmd(8, 0, 0, 1)"></button>
-                        </div>
-                        <div class="btn-module">
-                            <span class="module-label">-1 MINUTO</span>
-                            <button class="push-button black rect" onclick="sendCmd(8, 0, 0, 255)"></button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fila Inferior: Periodo y Conectividad -->
-                <div class="horizontal-section">
-                    <div class="btn-module">
-                        <span class="module-label">+1 PERIODO</span>
-                        <button class="push-button black rect" style="width: 80px;" onclick="sendCmd(5, 0, 0, 1)"></button>
-                    </div>
-                    <div class="btn-module">
-                        <span class="module-label">-1 PERIODO</span>
-                        <button class="push-button black rect" style="width: 80px;" onclick="sendCmd(5, 0, 0, 255)"></button>
-                    </div>
-                    
-                    <div style="width: 2px; height: 50px; background: #333; margin: 0 10px;"></div> <!-- Separador -->
-
-                    <div class="btn-module">
-                        <span id="mando-dash-text" style="color: #38bdf8; font-family: 'Share Tech Mono', monospace; font-size: 10px; margin-bottom: 5px; font-weight: bold;">0/18</span>
-                        <div id="sync-led" class="led-indicator red"></div>
-                        <span class="module-label" style="font-size:9px;">ESTADO</span>
-                    </div>
-
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #4ade80;">SYNC</span>
-                        <button class="push-button black rect" style="width: 70px;" onclick="handleSync()"></button>
-                    </div>
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #f87171;">UNPAIR</span>
-                        <button class="push-button black rect" style="width: 70px;" onclick="handleUnpair()"></button>
-                    </div>
-                </div>
-
             </div>
         </div>
 
-        <!-- =================== VISITA =================== -->
-        <div class="plate side">
-            <div class="plate-title" style="color: #60a5fa;">VISITA</div>
+        <!-- CENTER PANEL (MESA) -->
+        <div class="panel center">
+            <div class="panel-header header-mesa">MESA DE CONTROL</div>
             
-            <div class="team-grid">
-                <!-- Fila 1: Puntos -->
-                <div class="team-row">
-                    <div class="btn-module">
-                        <span class="module-label">+1 PTS</span>
-                        <button class="push-button blue" onclick="sendCmd(1, 2, 0, 1)"></button>
+            <div class="center-dashboard">
+                <!-- Main Controls -->
+                <div class="row" style="align-items: center; margin-bottom: 20px;">
+                    <div class="control-group">
+                        <span class="label" style="color: #a855f7;">EDITAR (SHIFT)</span>
+                        <button class="btn-rect btn-purple" id="btn-comando" onclick="toggleEditMode()">
+                            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        </button>
                     </div>
-                    <div class="btn-module">
-                        <span class="module-label">+2 PTS</span>
-                        <button class="push-button blue" onclick="sendCmd(1, 2, 0, 2)"></button>
+
+                    <div class="control-group">
+                        <span class="label" style="color: #fde047; font-size: 16px;">START / STOP</span>
+                        <button class="btn-huge btn-yellow" onclick="handleStartStop()">
+                            <svg viewBox="0 0 24 24" style="fill: #1c1917;"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <span class="label" style="font-size: 9px; color: #a855f7;">+ EDITAR = RESET PARTIDO</span>
                     </div>
-                    <div class="btn-module">
-                        <span class="module-label">+3 PTS</span>
-                        <button class="push-button blue" onclick="sendCmd(1, 2, 0, 3)"></button>
+
+                    <div class="control-group">
+                        <span class="label" style="color: #f87171;">BOCINA</span>
+                        <button class="btn-rect btn-red" onclick="sendCmd(6, 0, 0, 0)">
+                            <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zm2 4v6c1.33 0 2-.67 2-3s-.67-3-2-3z"/></svg>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Fila 2: Corrección Puntos -->
-                <div class="team-row" style="justify-content: center;">
-                    <div class="btn-module">
-                        <span class="module-label">-1 PUNTO</span>
-                        <button class="push-button black rect wide" onclick="sendCmd(1, 2, 0, 255)"></button>
+                <!-- Time Controls (Locked by default) -->
+                <div class="time-box">
+                    <div class="row">
+                        <div class="control-group">
+                            <span class="label">1 MIN</span>
+                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 1, 0, 0)">1:00</button>
+                        </div>
+                        <div class="control-group">
+                            <span class="label">5 MIN</span>
+                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 5, 0, 0)">5:00</button>
+                        </div>
+                        <div class="control-group">
+                            <span class="label">10 MIN</span>
+                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 10, 0, 0)">10:00</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="control-group">
+                            <button class="btn-rect btn-dark" onclick="sendCmd(8, 0, 0, 1)">+1 MIN</button>
+                        </div>
+                        <div class="control-group">
+                            <button class="btn-rect btn-dark" onclick="sendCmd(8, 0, 0, 255)">-1 MIN</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="divider"></div>
-
-                <!-- Fila 3: Faltas -->
-                <div class="team-row">
-                    <div class="btn-module">
-                        <span class="module-label" style="color: #f87171;">+ FALTA</span>
-                        <button class="push-button red" onclick="sendCmd(3, 2, 0, 1)"></button>
+                <!-- Bottom Controls -->
+                <div class="row" style="margin-top: 20px;">
+                    <div class="control-group">
+                        <span class="label">PERIODO</span>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-rect btn-dark" onclick="sendCmd(5, 0, 0, 1)">+1</button>
+                            <button class="btn-rect btn-dark" onclick="sendCmd(5, 0, 0, 255)">-1</button>
+                        </div>
                     </div>
-                    <div class="btn-module">
-                        <span class="module-label">- FALTA</span>
-                        <button class="push-button black" onclick="sendCmd(3, 2, 0, 255)"></button>
+
+                    <div style="width: 1px; background: var(--border-light);"></div>
+
+                    <div class="control-group">
+                        <span class="label" style="color: #4ade80;">VINCULAR (SYNC)</span>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-rect btn-dark" style="border-color: #4ade80;" onclick="handleSync()">SYNC</button>
+                            <button class="btn-rect btn-dark" style="border-color: #f87171;" onclick="handleUnpair()">UNPAIR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="label">ESTADO RED</span>
+                        <div id="sync-led" class="led"></div>
+                    </div>
+                    <span id="mando-dash-text" class="status-text">ESPERANDO...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISITA PANEL -->
+        <div class="panel side">
+            <div class="panel-header header-visita">VISITA</div>
+            <div class="btn-grid">
+                <!-- Puntos -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label">+1 PTS</span>
+                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 1)">+1</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label">+2 PTS</span>
+                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 2)">+2</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label">+3 PTS</span>
+                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 3)">+3</button>
+                    </div>
+                </div>
+                <!-- Correccion Puntos -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label">CORREGIR PUNTO</span>
+                        <button class="btn-wide btn-dark" onclick="sendCmd(1, 2, 0, 255)">-1</button>
+                    </div>
+                </div>
+                
+                <div style="height: 1px; background: var(--border-light); margin: 10px 0;"></div>
+                
+                <!-- Faltas -->
+                <div class="row">
+                    <div class="control-group">
+                        <span class="label" style="color: #f87171;">FALTA</span>
+                        <button class="btn-square btn-red" onclick="sendCmd(3, 2, 0, 1)">+1</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label">CORREGIR</span>
+                        <button class="btn-square btn-dark" onclick="sendCmd(3, 2, 0, 255)">-1</button>
                     </div>
                 </div>
             </div>
@@ -463,69 +349,62 @@
         
         function handleStartStop() {
             if (isEditMode) {
-                // RESET TOTAL DEL PARTIDO sin preguntar (comportamiento físico)
-                sendCmd(9, 0, 0, 0);
+                // RESET TOTAL DEL PARTIDO
+                if(confirm('¿Seguro que deseas RESETEAR EL PARTIDO a 0?')) {
+                    sendCmd(9, 0, 0, 0);
+                    toggleEditMode(); // Auto-lock again
+                }
             } else {
                 // INICIAR / PAUSAR RELOJ
                 sendCmd(4, 0, 0, 0);
             }
         }
 
-        let ledTimeout;
         function handleSync() {
             sendCmd(153, 0, 0, 0);
-            const led = document.getElementById('sync-led');
-            
-            // Simular parpadeo buscando red
-            led.className = 'led-indicator blinking';
+            document.getElementById('sync-led').classList.add('yellow');
         }
 
         function handleUnpair() {
-            sendCmd(154, 0, 0, 0);
+            if(confirm('¿Seguro que deseas desvincular este mando de la TV?')) {
+                sendCmd(154, 0, 0, 0);
+            }
         }
 
         function toggleEditMode() {
             isEditMode = !isEditMode;
             if (isEditMode) {
                 document.body.classList.add('edit-mode');
-                document.getElementById('btn-comando').classList.add('active-lock');
+                document.getElementById('btn-comando').style.boxShadow = '0 0 20px #a855f7';
+                document.getElementById('btn-comando').style.border = '2px solid #fff';
             } else {
                 document.body.classList.remove('edit-mode');
-                document.getElementById('btn-comando').classList.remove('active-lock');
+                document.getElementById('btn-comando').style.boxShadow = '';
+                document.getElementById('btn-comando').style.border = '';
             }
         }
 
-        // Soporte para la tecla Shift (COMANDO) y teclado
+        // Teclado
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Shift' && !isEditMode) {
-                toggleEditMode();
-            }
+            if (e.key === 'Shift' && !isEditMode) toggleEditMode();
         });
-
         window.addEventListener('keyup', (e) => {
-            if (e.key === 'Shift' && isEditMode) {
-                toggleEditMode();
-            }
+            if (e.key === 'Shift' && isEditMode) toggleEditMode();
         });
 
-        // Escuchar estado real del Hardware (ESP32)
+        // Escuchar Hardware
         ipcRenderer.on('serial-command', (event, { cmd, team, player, value }) => {
             if (cmd === 200) {
-                // team = vinculados, player = activos
                 const dashText = document.getElementById('mando-dash-text');
                 const led = document.getElementById('sync-led');
                 
-                if (dashText) {
-                    dashText.innerText = `Conectadas: ${player}/${team}`;
-                }
-                if (led) {
-                    if (player > 0) {
-                        led.className = 'led-indicator green';
-                    } else if (team > 0) {
-                        led.className = 'led-indicator red';
-                    } else {
-                        led.className = 'led-indicator'; // Naranja/Apagado por defecto
-                    }
+                dashText.innerText = `TVs: ${player} / Vinculadas: ${team}`;
+                
+                led.className = 'led'; // reset
+                if (player > 0) {
+                    led.classList.add('green');
+                } else if (team > 0) {
+                    // red is default
                 }
             }
         });

@@ -47,71 +47,84 @@
         </div>
     </div>
 
-    <!-- Tablero Principal FIBA (3 Columnas) -->
+    <!-- Tablero Principal FIBA (Modern Glassmorphism) -->
     <div id="scoreboard" class="scoreboard hidden">
         
-
-
         <!-- PANEL CENTRAL: RELOJ Y PUNTOS -->
         <div class="center-panel">
+            
             <!-- Reloj Principal -->
-            <div class="clock-box" onclick="editClock()" style="cursor: pointer;" title="Haz clic para editar el tiempo">
+            <div class="clock-box glass-panel" onclick="editClock()" style="cursor: pointer;" title="Haz clic para editar el tiempo">
                 <span id="main-clock" class="digital-number glow-red large-clock">12:00</span>
             </div>
             
             <!-- Marcador y Período -->
             <div class="scores-row">
+                
                 <div class="score-column">
-                    <h2 class="team-name" style="font-size: 60px; margin-bottom: 10px;">LOCAL</h2>
-                    <div class="score-wrapper">
+                    <h2 class="team-name">LOCAL</h2>
+                    <div class="score-wrapper glass-panel">
                         <span id="home-score" class="digital-number glow-red huge-score">00</span>
                     </div>
                 </div>
                 
-                <div class="period-wrapper" onclick="nextPeriod()" style="cursor: pointer;" title="Haz clic para avanzar de periodo">
+                <div class="period-wrapper glass-panel" onclick="nextPeriod()" style="cursor: pointer;" title="Haz clic para avanzar de periodo">
                     <div class="label">PERIODO</div>
                     <span id="period" class="digital-number glow-yellow medium-score">1</span>
-                    <div class="label" style="margin-top: 20px; font-size: 24px;">24S</div>
-                    <span id="shot-clock" class="digital-number glow-red" style="font-size: 80px;">24</span>
+                    
+                    <div class="shot-clock-container">
+                        <div class="label" style="font-size: 24px;">24S</div>
+                        <span id="shot-clock" class="digital-number glow-red" style="font-size: 110px;">24</span>
+                    </div>
                 </div>
 
                 <div class="score-column">
-                    <h2 class="team-name" style="font-size: 60px; margin-bottom: 10px;">VISITA</h2>
-                    <div class="score-wrapper">
+                    <h2 class="team-name">VISITA</h2>
+                    <div class="score-wrapper glass-panel">
                         <span id="guest-score" class="digital-number glow-red huge-score">00</span>
                     </div>
                 </div>
+
             </div>
 
             <!-- Estadísticas de Equipo (Faltas y Timeouts) -->
             <div class="team-stats-row">
+                
                 <!-- Stats Local -->
-                <div class="team-stats">
-                    <div class="label">FALTAS</div>
-                    <span id="home-team-fouls" class="digital-number glow-yellow small-score">0</span>
-                    <div id="home-bonus" class="bonus-indicator">BONUS</div>
-                    <div class="timeouts" id="home-timeouts">
-                        <div class="to-led active"></div>
-                        <div class="to-led active"></div>
-                        <div class="to-led active"></div>
+                <div class="team-stats glass-panel">
+                    <div class="foul-section">
+                        <div class="label">FALTAS</div>
+                        <span id="home-team-fouls" class="digital-number glow-yellow small-score">0</span>
+                    </div>
+                    <div class="extras-section" style="display:flex; flex-direction:column; align-items:center; gap: 20px;">
+                        <div id="home-bonus" class="bonus-indicator">BONUS</div>
+                        <div class="timeouts" id="home-timeouts">
+                            <div class="to-led active"></div>
+                            <div class="to-led active"></div>
+                            <div class="to-led active"></div>
+                        </div>
                     </div>
                 </div>
-
 
                 <!-- Stats Visita -->
-                <div class="team-stats">
-                    <div class="label">FALTAS</div>
-                    <span id="guest-team-fouls" class="digital-number glow-yellow small-score">0</span>
-                    <div id="guest-bonus" class="bonus-indicator">BONUS</div>
-                    <div class="timeouts" id="guest-timeouts">
-                        <div class="to-led active"></div>
-                        <div class="to-led active"></div>
-                        <div class="to-led active"></div>
+                <div class="team-stats glass-panel">
+                    <div class="extras-section" style="display:flex; flex-direction:column; align-items:center; gap: 20px;">
+                        <div id="guest-bonus" class="bonus-indicator">BONUS</div>
+                        <div class="timeouts" id="guest-timeouts">
+                            <div class="to-led active"></div>
+                            <div class="to-led active"></div>
+                            <div class="to-led active"></div>
+                        </div>
+                    </div>
+                    <div class="foul-section">
+                        <div class="label">FALTAS</div>
+                        <span id="guest-team-fouls" class="digital-number glow-yellow small-score">0</span>
                     </div>
                 </div>
+                
             </div>
+            
         </div>
-
     </div>
 
     <!-- Modal para Editar Reloj -->
