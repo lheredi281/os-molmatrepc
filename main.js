@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+﻿const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
@@ -6,14 +6,6 @@ const { exec } = require('child_process');
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch('disable-software-rasterizer');
 app.commandLine.appendSwitch('disable-gpu');
-// Habilitar recarga en caliente (Hot Reload)
-try {
-  require('electron-reload')(__dirname, {
-    electron: require(path.join(__dirname, 'node_modules', 'electron'))
-  });
-} catch (err) {
-  console.log('electron-reload no está instalado o falló al cargar.');
-}
 
 let mainWindow;
 let mandoWindow;
@@ -72,9 +64,6 @@ async function autoDetectSerialPort() {
       console.log(`[Auto-Detect] Placa USB asignada: ${espPort.path} (${espPort.manufacturer || 'Desconocido'})`);
       return espPort.path;
     }
-  } catch (err) {
-    console.log("Error buscando puertos:", err);
-  }
   
   // Fallback al puerto del entorno o por defecto según OS
   return process.platform === 'linux' ? '/dev/ttyUSB0' : 'COM3';
@@ -306,3 +295,5 @@ function initSerialPort(portName) {
     console.log("Error crítico inicializando el puerto serie:", error);
   }
 }
+
+

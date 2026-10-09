@@ -1,4 +1,4 @@
-﻿// Lógica del lado del cliente (Frontend)
+// Lógica del lado del cliente (Frontend)
 const splashScreen = document.getElementById('splash-screen');
 const scoreboard = document.getElementById('scoreboard');
 
@@ -55,7 +55,8 @@ setTimeout(() => {
 // ==========================================
 // ESTADO DEL PARTIDO (Reglas FIBA)
 // ==========================================
-let state = {
+let savedState = localStorage.getItem('tablero_state');
+let state = savedState ? JSON.parse(savedState) : {
     score: { local: 0, visita: 0 },
     team_fouls: { local: 0, visita: 0 },
     clock: 600, // 10 minutos
@@ -63,6 +64,13 @@ let state = {
     period: 1,
     shot_clock: 24
 };
+// Siempre iniciar con el reloj pausado, sin importar cmo se guard
+state.clock_running = false;
+
+// Persistir el estado cada 1 segundo (Para evitar prdida de datos si hay reinicios o cortes de luz)
+setInterval(() => {
+    localStorage.setItem('tablero_state', JSON.stringify(state));
+}, 1000);
 
 let clockInterval = null;
 
