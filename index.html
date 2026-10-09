@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -58,7 +58,7 @@
                 <span id="main-clock" class="digital-number glow-red large-clock">12:00</span>
             </div>
             
-            <!-- Marcador y Período -->
+            <!-- Marcador y PerÃ­odo -->
             <div class="scores-row">
                 
                 <div class="score-column">
@@ -87,7 +87,7 @@
 
             </div>
 
-            <!-- Estadísticas de Equipo (Faltas y Timeouts) -->
+            <!-- EstadÃ­sticas de Equipo (Faltas y Timeouts) -->
             <div class="team-stats-row">
                 
                 <!-- Stats Local -->
@@ -145,12 +145,12 @@
     </div>
 
     <script>
-        // Función para enviar orden de sincronización a la ESP32 de la TV
+        // FunciÃ³n para enviar orden de sincronizaciÃ³n a la ESP32 de la TV
         function forceSync() {
             if (window.ipcRenderer) {
                 // El comando 155 es el que la ESP32 (TV) escucha por USB para entrar en modo SYNC
                 window.ipcRenderer.send('virtual-command', { cmd: 155, team: 0, player: 0, value: 0 });
-                alert("¡TV en modo Emparejamiento!\nAhora presiona el botón SYNC en tu ventana de Mando.");
+                alert("Â¡TV en modo Emparejamiento!\nAhora presiona el botÃ³n SYNC en tu ventana de Mando.");
             }
         }
     </script>
@@ -163,7 +163,7 @@
             // Atajo de Teclado Shift + Espacio para poner la placa TV en modo emparejamiento
             window.addEventListener('keydown', (e) => {
                 if (e.key === ' ' && e.shiftKey) {
-                    // Manda señal a la ESP32 conectada a la PC TV
+                    // Manda seÃ±al a la ESP32 conectada a la PC TV
                     ipcRenderer.send('virtual-command', { cmd: 155, team: 0, player: 0, value: 0 });
                     
                     // Mostrar Interfaz Visual
@@ -238,8 +238,8 @@
             syncModal.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 20000; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif;';
             syncModal.innerHTML = `
                 <div style="background: #1e293b; padding: 40px; border-radius: 15px; width: 50%; max-width: 500px; text-align: center; border: 2px solid #22c55e;">
-                    <h2 style="color: white; margin-top: 0;">Vinculando Mando Inalámbrico...</h2>
-                    <p style="color: #94a3b8; font-size: 18px;">Por favor, enciende el Mando o presiona su botón de emparejamiento ahora para completar la vinculación.</p>
+                    <h2 style="color: white; margin-top: 0;">Vinculando Mando InalÃ¡mbrico...</h2>
+                    <p style="color: #94a3b8; font-size: 18px;">Por favor, enciende el Mando o presiona su botÃ³n de emparejamiento ahora para completar la vinculaciÃ³n.</p>
                     <div style="margin: 30px 0;">
                         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="animation: spin 2s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
                     </div>
@@ -267,14 +267,14 @@
             
             wifiModal.innerHTML = `
                 <div style="background: #1e293b; padding: 30px; border-radius: 15px; width: 60%; max-width: 600px; border: 2px solid #334155;">
-                    <h2 style="color: white; margin-top: 0;">Configuración Wi-Fi</h2>
+                    <h2 style="color: white; margin-top: 0;">ConfiguraciÃ³n Wi-Fi</h2>
                     <button onclick="document.getElementById('wifi-modal').style.display='none'" style="position:absolute; top:20px; right:30px; background:red; color:white; border:none; padding:10px 15px; border-radius:10px; cursor:pointer;">X</button>
                     <div id="wifi-list" style="height: 300px; overflow-y: auto; background: #0f172a; padding: 10px; border-radius: 8px;">
                         <p style="color: #94a3b8; text-align: center;">Escaneando redes...</p>
                     </div>
                     <div id="wifi-password-section" style="display: none; margin-top: 20px;">
                         <p style="color: #38bdf8; margin: 0 0 10px 0;" id="wifi-selected-name"></p>
-                        <input type="text" id="wifi-pass-input" placeholder="Contraseña..." readonly style="width: calc(100% - 20px); padding: 15px; font-size: 20px; border-radius: 8px; border: none; background: #334155; color: white;">
+                        <input type="text" id="wifi-pass-input" placeholder="ContraseÃ±a..." readonly style="width: calc(100% - 20px); padding: 15px; font-size: 20px; border-radius: 8px; border: none; background: #334155; color: white;">
                         <div id="osk" style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 15px;">
                             ${"1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split('').map(k => 
                                 `<button onclick="document.getElementById('wifi-pass-input').value += '${k}'" style="padding:15px; font-size:18px; background:#475569; color:white; border:none; border-radius:5px; cursor:pointer;">${k}</button>`
@@ -297,7 +297,7 @@
                     let html = '';
                     networks.forEach(n => {
                         html += `<div onclick="selectWifi('${n.ssid}')" style="padding: 15px; background: #334155; color: white; margin-bottom: 5px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between;">
-                            <span>${n.ssid}</span> <span style="color: #38bdf8;">Señal: ${n.signal}%</span>
+                            <span>${n.ssid}</span> <span style="color: #38bdf8;">SeÃ±al: ${n.signal}%</span>
                         </div>`;
                     });
                     document.getElementById('wifi-list').innerHTML = html || '<p style="color:red; text-align:center;">No se encontraron redes.</p>';
@@ -319,7 +319,7 @@
                 try {
                     const res = await ipcRenderer.invoke('wifi-connect', selectedSSID, pass);
                     if (res.success) {
-                        alert(`¡Conectado exitosamente a ${selectedSSID}!`);
+                        alert(`Â¡Conectado exitosamente a ${selectedSSID}!`);
                         wifiModal.style.display = 'none';
                     } else {
                         alert(`Error al conectar: ${res.error}`);
@@ -357,7 +357,7 @@
                         <!-- PANEL DERECHO: DISCO LOCAL -->
                         <div style="background: #0f172a; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; overflow: hidden;" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
                             <h3 style="color: #22c55e; margin-top: 0;">Destino: Tablero</h3>
-                            <p style="color:#94a3b8; margin-top:0; font-size:12px;">Arrastra videos/imágenes desde la izquierda hacia aquí para copiarlos.</p>
+                            <p style="color:#94a3b8; margin-top:0; font-size:12px;">Arrastra videos/imÃ¡genes desde la izquierda hacia aquÃ­ para copiarlos.</p>
                             <div id="local-files" style="flex: 1; overflow-y: auto; background: #1e293b; border-radius: 5px; padding: 10px;">
                                 <p style="color:#94a3b8; text-align:center;">Cargando archivos locales...</p>
                             </div>
@@ -377,7 +377,7 @@
                 
                 if (usbs.length === 0) {
                     selector.innerHTML = '<option value="">No hay pendrives conectados</option>';
-                    document.getElementById('usb-files').innerHTML = '<p style="color:red; text-align:center;">Inserta un USB y vuelve a abrir el menú.</p>';
+                    document.getElementById('usb-files').innerHTML = '<p style="color:red; text-align:center;">Inserta un USB y vuelve a abrir el menÃº.</p>';
                 } else {
                     selector.innerHTML = '<option value="">-- Selecciona un Pendrive --</option>' + usbs.map(u => `<option value="${u.path}">${u.name}</option>`).join('');
                 }
@@ -391,13 +391,13 @@
                 const files = await ipcRenderer.invoke('list-files', currentUsbPath);
                 
                 if (files.length === 0) {
-                    document.getElementById('usb-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">No hay fotos ni videos aquí.</p>';
+                    document.getElementById('usb-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">No hay fotos ni videos aquÃ­.</p>';
                     return;
                 }
                 
                 document.getElementById('usb-files').innerHTML = files.map(f => 
                     `<div draggable="true" ondragstart="event.dataTransfer.setData('sourcePath', '${f.path.replace(/\\/g, '\\\\')}'); event.dataTransfer.setData('fileName', '${f.name}')" style="padding:15px; background:#334155; color:white; margin-bottom:5px; border-radius:5px; cursor:grab; border-left:4px solid #38bdf8;">
-                        📄 ${f.name} (Arrastrar)
+                        ðŸ“„ ${f.name} (Arrastrar)
                     </div>`
                 ).join('');
             };
@@ -407,13 +407,13 @@
                 const files = await ipcRenderer.invoke('list-files', adsFolder);
                 
                 if (files.length === 0) {
-                    document.getElementById('local-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">Carpeta vacía.</p>';
+                    document.getElementById('local-files').innerHTML = '<p style="color:#94a3b8; text-align:center;">Carpeta vacÃ­a.</p>';
                     return;
                 }
                 
                 document.getElementById('local-files').innerHTML = files.map(f => 
                     `<div style="padding:15px; background:#334155; color:white; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid #22c55e;">
-                        <span>✅ ${f.name}</span>
+                        <span>âœ… ${f.name}</span>
                         <button onclick="deleteLocalFile('${f.name}')" style="background:red; color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;" title="Borrar">X</button>
                     </div>`
                 ).join('');
@@ -437,12 +437,33 @@
             };
 
             window.deleteLocalFile = async (fileName) => {
-                if (confirm('¿Seguro que deseas borrar ' + fileName + '?')) {
+                if (confirm('Â¿Seguro que deseas borrar ' + fileName + '?')) {
                     await ipcRenderer.invoke('delete-file', fileName);
                     await refreshLocalFiles();
                 }
             };
         }
     </script>
+<script>
+function autoScaleTablero() {
+    const board = document.querySelector('.scoreboard');
+    if (!board) return;
+    const targetWidth = 1920;
+    const targetHeight = 1080;
+    
+    const availableWidth = window.innerWidth;
+    const availableHeight = window.innerHeight - 80; 
+    
+    const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.95;
+    
+    // As the board is top:50%, left:50%
+    // Shift the center slightly up (e.g. -40px) to give room for marquee at bottom
+    board.style.transform = \	ranslate(-50%, calc(-50% - 30px)) scale(\)\;
+}
+window.addEventListener('resize', autoScaleTablero);
+setTimeout(autoScaleTablero, 100);
+setInterval(autoScaleTablero, 2000); // Enforce it occasionally
+</script>
 </body>
 </html>
+
