@@ -28,7 +28,7 @@ echo "✅ Arquitectura compatible ($ARCH)."
 
 # 3. PEDIR EL USUARIO OBJETIVO
 echo ""
-read -p "👉 Ingresa el nombre de tu usuario normal de la PC (ej. admin o chanca): " TARGET_USER
+read -p "👉 Ingresa el nombre de tu usuario normal de la PC (ej. admin o chanca): " TARGET_USER < /dev/tty
 
 if ! id -u "$TARGET_USER" > /dev/null 2>&1; then
   echo "❌ El usuario '$TARGET_USER' no existe. Asegúrate de escribirlo bien."
