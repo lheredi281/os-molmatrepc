@@ -98,6 +98,18 @@ app.whenReady().then(async () => {
   });
   
 
+  ipcMain.on('trigger-sync', (event) => {
+    if (globalPort && globalPort.isOpen) {
+      const buf = Buffer.from([155, 0, 0, 0, 155]);
+      globalPort.write(buf, (err) => {
+        if(err) console.log("Error enviando SYNC por Serial:", err);
+      });
+      console.log(`[Virtual] -> Comando de Sincronización Enviado a la Receptora (155)`);
+    } else {
+      console.log(`[Virtual] -> Intentó enviar SYNC pero el puerto está cerrado.`);
+    }
+  });
+
   ipcMain.on('virtual-command', (event, { cmd, team, player, value }) => {
     
     // 1. Si estamos en modo 'ambos' o 'tv' con el mando local, lo mandamos directo al tablero interno
