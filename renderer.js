@@ -520,6 +520,10 @@ if (window.require) {
         }
     });
 
+    // Iniciar publicidad si arrancamos en ese modo
+    if (isAdMode) {
+        fetchAds().then(() => { if (typeof playNextAd === 'function') playNextAd(); });
+    }
 }
 
 // Configuración visual según el MODO (Mando vs TV)
@@ -530,4 +534,5 @@ if (appMode === 'mando') {
 }
 
 updateUI();
+
 
