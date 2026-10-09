@@ -20,7 +20,8 @@ function adjustScale() {
     // Calculamos el factor de escala para mantener la proporción exacta
     const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);
     
-    // scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    scoreboard.style.transformOrigin = 'center center';
     
     // Aplicamos escala a la pantalla de carga para que tampoco se deforme
     const logoContainer = document.querySelector('.logo-container');
