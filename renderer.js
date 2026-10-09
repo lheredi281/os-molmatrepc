@@ -548,6 +548,34 @@ if (window.require) {
         }
     });
 
+    
+    // Auto-actualizar Sponsors cada 30 segundos
+    setInterval(async () => {
+        if (navigator.onLine) {
+            try {
+                const { data: sponsorsData } = await supabase.from('sponsors').select('*').eq('activo', true).order('orden', { ascending: true });
+                const marqContainer = document.getElementById('marquesina-container');
+                const marqText = document.getElementById('marquesina-text');
+                
+                if (sponsorsData && sponsorsData.length > 0) {
+                    marqContainer.style.display = 'block';
+                    let htmlContent = '';
+                    sponsorsData.forEach(s => {
+                        htmlContent += '<span class="sponsor-item">';
+                        if (s.logo_url) {
+                            htmlContent += '<img src="' + s.logo_url + '" class="sponsor-logo" /> ';
+                        }
+                        htmlContent += '<span class="sponsor-text">' + s.texto + '</span>';
+                        htmlContent += '</span><span class="sponsor-separator"> ♦ </span>';
+                    });
+                    marqText.innerHTML = htmlContent + htmlContent + htmlContent;
+                } else {
+                    marqContainer.style.display = 'none';
+                }
+            } catch(e){}
+        }
+    }, 30000);
+
     // Iniciar publicidad si arrancamos en ese modo
     if (isAdMode) {
         fetchAds().then(() => { if (typeof playNextAd === 'function') playNextAd(); });
