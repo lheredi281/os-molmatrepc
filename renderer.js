@@ -20,8 +20,7 @@ function adjustScale() {
     // Calculamos el factor de escala para mantener la proporción exacta
     const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);
     
-    // Aplicamos la escala al tablero. El translate(-50%, -50%) es porque está centrado absoluto en CSS.
-    scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    // scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
     
     // Aplicamos escala a la pantalla de carga para que tampoco se deforme
     const logoContainer = document.querySelector('.logo-container');
