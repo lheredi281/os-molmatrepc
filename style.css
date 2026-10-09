@@ -299,3 +299,27 @@ body {
 #clock-modal input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none; margin: 0;
 }
+
+/* Sponsors CSS */
+.sponsor-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+}
+.sponsor-logo {
+    height: 40px;
+    width: auto;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 2px;
+}
+.sponsor-text {
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 2px;
+}
+.sponsor-separator {
+    color: #38bdf8;
+    margin: 0 40px;
+    font-size: 24px;
+}

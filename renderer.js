@@ -420,13 +420,23 @@ if (window.require) {
         // 1. Obtener de la Nube (Vercel/Supabase)
         if (navigator.onLine) {
             try {
-                // Traer Marquesina
-                const { data: sysData } = await supabase.from('system_settings').select('*').eq('id', 1).single();
+                                                // Traer Sponsors (Marquesina din�mica)
+                const { data: sponsorsData } = await supabase.from('sponsors').select('*').eq('activo', true).order('orden', { ascending: true });
                 const marqContainer = document.getElementById('marquesina-container');
                 const marqText = document.getElementById('marquesina-text');
-                if (sysData && sysData.marquesina && sysData.marquesina.trim() !== '') {
+                
+                if (sponsorsData && sponsorsData.length > 0) {
                     marqContainer.style.display = 'block';
-                    marqText.innerText = sysData.marquesina;
+                    let htmlContent = '';
+                    sponsorsData.forEach(s => {
+                        htmlContent += '<span class="sponsor-item">';
+                        if (s.logo_url) {
+                            htmlContent += '<img src="' + s.logo_url + '" class="sponsor-logo" /> ';
+                        }
+                        htmlContent += '<span class="sponsor-text">' + s.texto + '</span>';
+                        htmlContent += '</span><span class="sponsor-separator"> &diams; </span>';
+                    });
+                    marqText.innerHTML = htmlContent + htmlContent + htmlContent;
                 } else {
                     marqContainer.style.display = 'none';
                 }
@@ -552,6 +562,7 @@ if (appMode === 'mando') {
 }
 
 updateUI();
+
 
 
 
