@@ -26,8 +26,8 @@ if [ "$LOCAL" != "$REMOTE" ]; then
     # 4. Volver a inyectar el modo sin-sandbox para Linux
     sed -i 's/"electron ."/"electron . --no-sandbox"/g' package.json
     
-    # 5. Reiniciar la interfaz gráfica matando el servidor X (el autologin lo volverá a levantar)
-    sudo pkill X
+    # 5. Reiniciar la interfaz gráfica (intentando varios métodos robustos)
+    sudo systemctl restart display-manager || sudo pkill X || sudo pkill -9 Xorg
 else
     echo "El sistema ya está en la última versión."
 fi

@@ -2,6 +2,10 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
+
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch('disable-software-rasterizer');
+app.commandLine.appendSwitch('disable-gpu');
 // Habilitar recarga en caliente (Hot Reload)
 try {
   require('electron-reload')(__dirname, {
@@ -148,7 +152,8 @@ app.whenReady().then(async () => {
 
   ipcMain.handle('copy-file', (event, sourcePath, destName) => {
     try {
-      const destPath = path.join(adsFolder, destName);
+      const safeDestName = path.basename(destName);
+      const destPath = path.join(adsFolder, safeDestName);
       fs.copyFileSync(sourcePath, destPath);
       return { success: true };
     } catch(e) {
@@ -158,7 +163,8 @@ app.whenReady().then(async () => {
 
   ipcMain.handle('delete-file', (event, fileName) => {
     try {
-      fs.unlinkSync(path.join(adsFolder, fileName));
+      const safeFileName = path.basename(fileName);
+      fs.unlinkSync(path.join(adsFolder, safeFileName));
       return { success: true };
     } catch(e) { return { success: false }; }
   });

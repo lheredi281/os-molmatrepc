@@ -278,7 +278,7 @@ if (window.require) {
                 state.shot_clock = value;
                 break;
 
-            case 200: // REPORTE DE ESTADO DE CONEXION (Unicast)
+            case 200: { // REPORTE DE ESTADO DE CONEXION (Unicast)
                 // team = vinculados, player = activos
                 const lblVinculadas = document.getElementById('dash-vinculadas');
                 const lblOnline = document.getElementById('dash-online');
@@ -314,6 +314,7 @@ if (window.require) {
                 }
                 // Evitamos que updateUI() haga algo extra si es solo status
                 return;
+            }
                 
             default:
                 console.log("Comando de Hardware desconocido:", cmd);
@@ -346,16 +347,20 @@ if (window.require) {
         let localAds = [];
 
         // 1. Obtener de la Nube (Vercel/Supabase)
-        try {
-            const { data, error } = await supabase
-                .from('publicidad')
-                .select('*')
-                .eq('activo', true)
-                .order('orden', { ascending: true });
-                
-            if (!error && data) supabaseAds = data;
-        } catch (err) {
-            console.error("Error fetching ads:", err);
+        if (navigator.onLine) {
+            try {
+                const { data, error } = await supabase
+                    .from('publicidad')
+                    .select('*')
+                    .eq('activo', true)
+                    .order('orden', { ascending: true });
+                    
+                if (!error && data) supabaseAds = data;
+            } catch (err) {
+                console.error("Error fetching ads:", err);
+            }
+        } else {
+            console.warn("Sin conexión: Saltando Supabase");
         }
 
         // 2. Obtener locales (Los que copiaste con el USB)
