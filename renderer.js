@@ -424,11 +424,14 @@ if (window.require) {
         if (navigator.onLine) {
             try {
                                                 // Traer Sponsors (Marquesina din�mica)
+                const { data: setts } = await supabase.from('system_settings').select('marquesina').eq('id', 1).single();
+                const isGlobalEnabled = !setts || setts.marquesina !== 'false';
+                
                 const { data: sponsorsData } = await supabase.from('sponsors').select('*').eq('activo', true).order('orden', { ascending: true });
                 const marqContainer = document.getElementById('marquesina-container');
                 const marqText = document.getElementById('marquesina-text');
                 
-                if (sponsorsData && sponsorsData.length > 0 && !isAdMode) {
+                if (sponsorsData && sponsorsData.length > 0 && !isAdMode && isGlobalEnabled) {
                     marqContainer.style.display = 'block';
                     let htmlContent = '';
                     sponsorsData.forEach(s => {
