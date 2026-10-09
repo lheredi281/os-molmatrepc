@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
@@ -15,8 +15,22 @@ const MODE = process.env.MODE || 'tv'; // Puede ser 'tv', 'mando' o 'ambos'
 const COMPORT = process.env.COMPORT || 'COM3';
 
 function createWindow() {
+  let displays = screen.getAllDisplays();
+  let externalDisplay = displays.find((display) => {
+    return display.bounds.x !== 0 || display.bounds.y !== 0;
+  });
+
   if (MODE === 'tv' || MODE === 'ambos') {
+    let tvBounds = { x: 0, y: 0, width: 1280, height: 720 };
+    if (externalDisplay) {
+      console.log('Pantalla externa detectada, asignando TV a esta pantalla.');
+      tvBounds.x = externalDisplay.bounds.x;
+      tvBounds.y = externalDisplay.bounds.y;
+    }
+
     mainWindow = new BrowserWindow({
+      x: tvBounds.x,
+      y: tvBounds.y,
       width: 1280,
       height: 720,
       fullscreen: true, 
@@ -73,13 +87,13 @@ async function autoDetectSerialPort() {
 app.whenReady().then(async () => {
   // HDMI-CEC: Encender TV y forzar fuente HDMI
   if (process.platform === 'linux') {
-    console.log("[CEC] Enviando señal para encender la TV...");
+    console.log("[CEC] Enviando seï¿½al para encender la TV...");
     exec('echo "on 0" | cec-client -s -d 1', () => {
       exec('echo "as" | cec-client -s -d 1');
     });
   }
 
-  // Inicializar Puerto Serie con auto-detección primero
+  // Inicializar Puerto Serie con auto-detecciï¿½n primero
   const portToUse = await autoDetectSerialPort();
   initSerialPort(portToUse); 
 
@@ -90,15 +104,15 @@ app.whenReady().then(async () => {
 
   ipcMain.on('trigger-sync', (event) => {
     if (globalPort && globalPort.isOpen) {
-      // Enviamos una ráfaga de 10 bytes de 155 para garantizar que la placa ESP32
-      // lo reciba incluso si se descuadró leyendo basura del inicio de Linux
+      // Enviamos una rï¿½faga de 10 bytes de 155 para garantizar que la placa ESP32
+      // lo reciba incluso si se descuadrï¿½ leyendo basura del inicio de Linux
       const buf = Buffer.from([155, 155, 155, 155, 155, 155, 155, 155, 155, 155]);
       globalPort.write(buf, (err) => {
         if(err) console.log("Error enviando SYNC por Serial:", err);
       });
-      console.log(`[Virtual] -> Ráfaga de Sincronización Enviada a la Receptora (155)`);
+      console.log(`[Virtual] -> Rï¿½faga de Sincronizaciï¿½n Enviada a la Receptora (155)`);
     } else {
-      console.log(`[Virtual] -> Intentó enviar SYNC pero el puerto está cerrado.`);
+      console.log(`[Virtual] -> Intentï¿½ enviar SYNC pero el puerto estï¿½ cerrado.`);
     }
   });
 
@@ -222,7 +236,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// Lógica de lectura del puerto Serie
+// Lï¿½gica de lectura del puerto Serie
 function initSerialPort(portName) {
   try {
     // Siempre abrimos la ventana, haya o no mando.
@@ -282,18 +296,18 @@ function initSerialPort(portName) {
             if (mandoWindow) {
               mandoWindow.webContents.send('serial-command', { cmd, team, player, value });
             }
-            buffer = buffer.subarray(5); // Paquete válido, avanzamos 5 bytes
+            buffer = buffer.subarray(5); // Paquete vï¿½lido, avanzamos 5 bytes
           } else {
-            console.log(`[Hardware ESP32] ?? ERROR: Checksum inválido (Esperado: ${calculatedChecksum}, Recibido: ${checksum}). Descartando 1 byte para re-sincronizar...`);
-            buffer = buffer.subarray(1); // ¡CLAVE! Solo avanzamos 1 byte si falla, para buscar el inicio real del próximo paquete
+            console.log(`[Hardware ESP32] ?? ERROR: Checksum invï¿½lido (Esperado: ${calculatedChecksum}, Recibido: ${checksum}). Descartando 1 byte para re-sincronizar...`);
+            buffer = buffer.subarray(1); // ï¿½CLAVE! Solo avanzamos 1 byte si falla, para buscar el inicio real del prï¿½ximo paquete
           }
         }
       });
     }
 
-    connect(); // <-- INICIO DE LA CONEXIÓN
+    connect(); // <-- INICIO DE LA CONEXIï¿½N
   } catch (error) {
-    console.log("Error crítico inicializando el puerto serie:", error);
+    console.log("Error crï¿½tico inicializando el puerto serie:", error);
   }
 }
 
