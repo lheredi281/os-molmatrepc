@@ -26,7 +26,7 @@
 
     <!-- Marquesina Informativa -->
     <div id="marquesina-container">
-        <span id="marquesina-text"></span>
+        <marquee id="marquesina-text" scrollamount="12" scrolldelay="0" truespeed></marquee>
     </div>
 
     <!-- Xbox-style Dashboard (Solo Mando) -->
@@ -450,19 +450,16 @@ function autoScaleTablero() {
     if (!board) return;
     const targetWidth = 1920;
     const targetHeight = 1080;
-    
     const availableWidth = window.innerWidth;
-    const availableHeight = window.innerHeight - 80; 
-    
+    const availableHeight = window.innerHeight - 80; // Dejar 80px para marquesina
     const scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight) * 0.95;
     
-    // As the board is top:50%, left:50%
-    // Shift the center slightly up (e.g. -40px) to give room for marquee at bottom
-    board.style.transform = \	ranslate(-50%, calc(-50% - 30px)) scale(\)\;
+    // Centrar con transform y un pequeño ajuste vertical
+    board.style.transform = 'translate(-50%, calc(-50% - 30px)) scale(' + scale + ')';
 }
 window.addEventListener('resize', autoScaleTablero);
 setTimeout(autoScaleTablero, 100);
-setInterval(autoScaleTablero, 2000); // Enforce it occasionally
+setInterval(autoScaleTablero, 2000);
 </script>
 </body>
 </html>

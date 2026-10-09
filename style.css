@@ -281,12 +281,12 @@ body {
     overflow: hidden; white-space: nowrap; padding: 15px 0; z-index: 200;
 }
 #marquesina-text {
-    display: inline-block;
+    display: block; width: 100%;
     color: var(--yellow-glow);
     font-size: 36px;
     font-weight: 700;
-    padding-left: 100%;
-    animation: scroll 20s linear infinite; will-change: transform;
+    
+    /* Usando tag HTML marquee para rendimiento en Atom */
     /* text-shadow removed for fps */
 }
 @keyframes scroll {
