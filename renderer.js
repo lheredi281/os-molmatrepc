@@ -57,7 +57,23 @@ let state = {
 
 let clockInterval = null;
 
+let prevState = { local: 0, visita: 0 };
+
 function updateUI() {
+    // Animación Pulse si hay cambio de puntos
+    if (state.score.local !== prevState.local) {
+        homeScoreEl.classList.remove('pulse-anim');
+        void homeScoreEl.offsetWidth; // Forzar reflow
+        homeScoreEl.classList.add('pulse-anim');
+        prevState.local = state.score.local;
+    }
+    if (state.score.visita !== prevState.visita) {
+        guestScoreEl.classList.remove('pulse-anim');
+        void guestScoreEl.offsetWidth; // Forzar reflow
+        guestScoreEl.classList.add('pulse-anim');
+        prevState.visita = state.score.visita;
+    }
+
     homeScoreEl.innerText = String(state.score.local).padStart(2, '0');
     guestScoreEl.innerText = String(state.score.visita).padStart(2, '0');
     
@@ -349,6 +365,18 @@ if (window.require) {
         // 1. Obtener de la Nube (Vercel/Supabase)
         if (navigator.onLine) {
             try {
+                // Traer Marquesina
+                const { data: sysData } = await supabase.from('system_settings').select('*').eq('id', 1).single();
+                const marqContainer = document.getElementById('marquesina-container');
+                const marqText = document.getElementById('marquesina-text');
+                if (sysData && sysData.marquesina && sysData.marquesina.trim() !== '') {
+                    marqContainer.style.display = 'block';
+                    marqText.innerText = sysData.marquesina;
+                } else {
+                    marqContainer.style.display = 'none';
+                }
+
+                // Traer Publicidades
                 const { data, error } = await supabase
                     .from('publicidad')
                     .select('*')
@@ -386,8 +414,8 @@ if (window.require) {
         if (!isAdMode) return;
         if (adsList.length === 0) {
             adLoading.style.display = 'block';
-            adVideo.style.display = 'none';
-            adImage.style.display = 'none';
+            adVideo.style.opacity = 0;
+            adImage.style.opacity = 0;
             adTimeout = setTimeout(() => {
                 fetchAds().then(playNextAd);
             }, 5000);
@@ -402,29 +430,42 @@ if (window.require) {
         adVideo.onended = null;
         adVideo.onerror = null;
 
-        if (ad.tipo === 'video') {
-            adImage.style.display = 'none';
-            adVideo.style.display = 'block';
-            adVideo.src = ad.url_archivo;
-            
-            adVideo.onended = () => playNextAd();
-            adVideo.onerror = () => playNextAd();
+        // Desvanecer el actual
+        adVideo.style.opacity = 0;
+        adImage.style.opacity = 0;
 
-            adVideo.play().catch(e => {
-                console.log("Video auto-play prevenido", e);
-                adTimeout = setTimeout(playNextAd, 5000);
-            });
-            
-        } else {
-            adVideo.style.display = 'none';
-            adVideo.pause();
-            
-            adImage.style.display = 'block';
-            adImage.src = ad.url_archivo;
-            
-            const durationMs = (ad.duracion_segundos || 10) * 1000;
-            adTimeout = setTimeout(playNextAd, durationMs);
-        }
+        setTimeout(() => {
+            if (ad.tipo === 'video') {
+                adImage.style.display = 'none';
+                adVideo.style.display = 'block';
+                adVideo.src = ad.url_archivo;
+                
+                adVideo.onended = () => playNextAd();
+                adVideo.onerror = () => playNextAd();
+
+                adVideo.play().then(() => {
+                    adVideo.style.opacity = 1;
+                }).catch(e => {
+                    console.log("Video auto-play prevenido", e);
+                    adTimeout = setTimeout(playNextAd, 5000);
+                });
+                
+            } else {
+                adVideo.style.display = 'none';
+                adVideo.pause();
+                
+                adImage.style.display = 'block';
+                adImage.src = ad.url_archivo;
+                
+                // Mostrar solo cuando cargue para que la transición sea limpia
+                adImage.onload = () => {
+                    adImage.style.opacity = 1;
+                };
+                
+                const durationMs = (ad.duracion_segundos || 10) * 1000;
+                adTimeout = setTimeout(playNextAd, durationMs);
+            }
+        }, 500); // Esperar medio segundo al desvanecimiento antes de cargar la próxima
     }
 
     ipcRenderer.on('mando-status', async (event, { connected }) => {

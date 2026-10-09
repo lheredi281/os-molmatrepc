@@ -234,3 +234,44 @@ body {
 }
 .arrow { font-size: 150px; color: #333; }
 .arrow.active { color: var(--red-glow); text-shadow: 0 0 20px var(--red-glow); }
+
+/* MEJORAS VISUALES: Crossfade, Pulse y Marquesina */
+#ads-container img, #ads-container video {
+    transition: opacity 1s ease-in-out;
+}
+
+@keyframes pulseAnim {
+    0% { transform: scale(1); text-shadow: 0 0 10px rgba(255, 204, 0, 0.8); }
+    50% { transform: scale(1.1); text-shadow: 0 0 30px rgba(255, 204, 0, 1); }
+    100% { transform: scale(1); text-shadow: 0 0 10px rgba(255, 204, 0, 0.8); }
+}
+.pulse-anim {
+    animation: pulseAnim 0.3s ease-out;
+}
+
+#marquesina-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #0f172a;
+    border-top: 3px solid #334155;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+    z-index: 200;
+    display: none; /* Oculto por defecto */
+}
+#marquesina-text {
+    display: inline-block;
+    color: var(--yellow-glow);
+    font-size: 30px;
+    font-family: 'Inter', sans-serif;
+    font-weight: bold;
+    padding-left: 100%;
+    animation: scroll 20s linear infinite;
+}
+@keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
