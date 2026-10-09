@@ -304,8 +304,14 @@ if (window.require) {
                 if (state.team_fouls[teamName] < 0) state.team_fouls[teamName] = 0;
                 break;
                 
-            case 4: // Iniciar/Detener Reloj
+            case 4: // Iniciar/Detener Reloj (Toggle legacy)
                 toggleClock();
+                break;
+            case 10: // Explicit START
+                if (!state.clock_running) toggleClock();
+                break;
+            case 11: // Explicit STOP
+                if (state.clock_running) toggleClock();
                 break;
                 
             case 5: // Cambiar Periodo (+1 o -1)

@@ -222,13 +222,21 @@
                         </button>
                     </div>
 
-                    <div class="control-group">
-                        <span class="label" style="color: #fde047; font-size: 16px;">START / STOP</span>
-                        <button class="btn-huge btn-yellow" onclick="handleStartStop()">
-                            <svg viewBox="0 0 24 24" style="fill: #1c1917;"><path d="M8 5v14l11-7z"/></svg>
-                        </button>
-                        <span class="label" style="font-size: 9px; color: #a855f7;">+ EDITAR = RESET PARTIDO</span>
+                    <div class="control-group" style="flex-direction: row; gap: 20px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <span class="label" style="color: #4ade80; font-size: 16px;">START</span>
+                            <button class="btn-huge btn-green" onclick="handleStart()">
+                                <svg viewBox="0 0 24 24" style="fill: #1c1917;"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <span class="label" style="color: #f87171; font-size: 16px;">STOP</span>
+                            <button class="btn-huge btn-red" onclick="handleStop()">
+                                <svg viewBox="0 0 24 24" style="fill: white;"><path d="M6 6h12v12H6z"/></svg>
+                            </button>
+                        </div>
                     </div>
+                    <span class="label" style="font-size: 10px; color: #a855f7; margin-top: -10px;">+ EDITAR EN START = RESET PARTIDO</span>
 
                     <div class="control-group">
                         <span class="label" style="color: #f87171;">BOCINA</span>
