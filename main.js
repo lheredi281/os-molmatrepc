@@ -65,8 +65,8 @@ async function autoDetectSerialPort() {
     const ports = await SerialPort.list();
     console.log("Puertos disponibles encontrados:", ports.map(p => p.path).join(", "));
     
-    // Buscar puertos que tengan vendorId o contengan la palabra 'COM'
-    const espPort = ports.find(p => p.vendorId || p.path.toUpperCase().includes('COM'));
+    // Buscar puertos que tengan vendorId, o contengan ttyUSB, ttyACM o COM
+    const espPort = ports.find(p => p.vendorId || p.path.toUpperCase().includes('COM') || p.path.includes('ttyUSB') || p.path.includes('ttyACM'));
     
     if (espPort) {
       console.log(`[Auto-Detect] Placa USB asignada: ${espPort.path} (${espPort.manufacturer || 'Desconocido'})`);
@@ -76,8 +76,8 @@ async function autoDetectSerialPort() {
     console.log("Error buscando puertos:", err);
   }
   
-  // Fallback al puerto del entorno o COM3
-  return process.env.COMPORT || 'COM3';
+  // Fallback al puerto del entorno o por defecto según OS
+  return process.platform === 'linux' ? '/dev/ttyUSB0' : 'COM3';
 }
 
 app.whenReady().then(async () => {
@@ -100,11 +100,13 @@ app.whenReady().then(async () => {
 
   ipcMain.on('trigger-sync', (event) => {
     if (globalPort && globalPort.isOpen) {
-      const buf = Buffer.from([155, 0, 0, 0, 155]);
+      // Enviamos una ráfaga de 10 bytes de 155 para garantizar que la placa ESP32
+      // lo reciba incluso si se descuadró leyendo basura del inicio de Linux
+      const buf = Buffer.from([155, 155, 155, 155, 155, 155, 155, 155, 155, 155]);
       globalPort.write(buf, (err) => {
         if(err) console.log("Error enviando SYNC por Serial:", err);
       });
-      console.log(`[Virtual] -> Comando de Sincronización Enviado a la Receptora (155)`);
+      console.log(`[Virtual] -> Ráfaga de Sincronización Enviada a la Receptora (155)`);
     } else {
       console.log(`[Virtual] -> Intentó enviar SYNC pero el puerto está cerrado.`);
     }
