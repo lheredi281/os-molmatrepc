@@ -220,7 +220,35 @@ if (window.require) {
     const { ipcRenderer } = window.require('electron');
     
     // Escuchar el nuevo evento estructurado desde main.js
+    let heartbeatTimeout;
+
     ipcRenderer.on('serial-command', (event, { cmd, team, player, value }) => {
+        // --- 1. DETECCIÓN DE PRESENCIA (LATIDO) ---
+        // Despertar tablero si estábamos en publicidad, porque el mando habló
+        if (isAdMode) {
+            isAdMode = false;
+            clearTimeout(adTimeout);
+            adVideo.pause();
+            adsContainer.classList.add('hidden');
+            adsContainer.style.display = 'none';
+            scoreboard.classList.remove('hidden');
+        }
+
+        // Renovar el tiempo de vida (10 segundos sin señal = Mando apagado/lejos)
+        clearTimeout(heartbeatTimeout);
+        heartbeatTimeout = setTimeout(async () => {
+            if (!isAdMode) {
+                isAdMode = true;
+                scoreboard.classList.add('hidden');
+                adsContainer.classList.remove('hidden');
+                adsContainer.style.display = 'flex';
+                await fetchAds();
+                playNextAd();
+            }
+        }, 10000);
+
+        if (cmd === 254) return; // Si solo era un latido de presencia, no procesar el switch
+
         // Mapeo del protocolo de 5 bytes a las funciones que ya creamos
         
         // team: 1 (Local), 2 (Visita)
@@ -469,20 +497,13 @@ if (window.require) {
     }
 
     ipcRenderer.on('mando-status', async (event, { connected }) => {
-        if (connected) {
-            // MODO TABLERO
-            isAdMode = false;
-            clearTimeout(adTimeout);
-            adVideo.pause();
-            adsContainer.classList.add('hidden'); // IMPORTANTE: Volver a ocultar
-            adsContainer.style.display = 'none';
-            scoreboard.classList.remove('hidden');
-        } else {
-            // MODO PUBLICIDAD
+        // Solo reaccionamos si se desconecta físicamente el USB
+        if (!connected) {
+            // MODO PUBLICIDAD (Mando ausente)
             if (!isAdMode) {
                 isAdMode = true;
                 scoreboard.classList.add('hidden');
-                adsContainer.classList.remove('hidden'); // IMPORTANTE: Remover clase hidden
+                adsContainer.classList.remove('hidden');
                 adsContainer.style.display = 'flex';
                 await fetchAds();
                 playNextAd();
