@@ -170,8 +170,10 @@ void handleCmd() {
     uint8_t packet[5] = {c, t, p, v, checksum};
     Serial.write(packet, 5);
 
+    server.sendHeader("Connection", "close");
     server.send(200, "text/plain", "OK");
   } else {
+    server.sendHeader("Connection", "close");
     server.send(400, "text/plain", "Bad Request");
   }
 }

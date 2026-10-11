@@ -180,10 +180,21 @@ async function autoDetectSerialPort() {
 
   if (process.platform === 'linux') {
     const fs = require('fs');
-    if (fs.existsSync('/dev/ttyUSB0')) return '/dev/ttyUSB0';
-    if (fs.existsSync('/dev/ttyACM0')) return '/dev/ttyACM0';
-    return '/dev/ttyUSB0';
+    // Buscar puertos en orden descendente para tomar el puerto activo actual tras desconexión
+    for (let i = 4; i >= 0; i--) {
+      const usbPath = `/dev/ttyUSB${i}`;
+      if (fs.existsSync(usbPath)) {
+        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
+        return usbPath;
+      }
+      const acmPath = `/dev/ttyACM${i}`;
+      if (fs.existsSync(acmPath)) {
+        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto CDC/ACM activo: ${acmPath}`);
+        return acmPath;
+      }
+    }
   }
+
   return 'COM3';
 }
 
