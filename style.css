@@ -2,9 +2,10 @@
 
 :root {
     --bg-color: #000000;
-    --red-glow: #ff0000;
-    --yellow-glow: #ffcc00;
-    --green-glow: #00ff00;
+    --red-glow: #ff2247;
+    --yellow-glow: #ffd000;
+    --green-glow: #00ff88;
+    --cyan-glow: #00e5ff;
     --text-color: #ffffff;
 }
 
@@ -12,6 +13,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-variant-numeric: tabular-nums;
 }
 
 body {
@@ -35,9 +37,29 @@ body {
     font-weight: 900;
 }
 
-.glow-red { color: var(--red-glow); }
-.glow-yellow { color: var(--yellow-glow); }
-.glow-green { color: var(--green-glow); }
+.glow-red { color: var(--red-glow); text-shadow: 0 0 35px rgba(255, 34, 71, 0.65); }
+.glow-yellow { color: var(--yellow-glow); text-shadow: 0 0 35px rgba(255, 208, 0, 0.65); }
+.glow-green { color: var(--green-glow); text-shadow: 0 0 35px rgba(0, 255, 136, 0.65); }
+.glow-cyan { color: var(--cyan-glow); text-shadow: 0 0 35px rgba(0, 229, 255, 0.65); }
+
+/* MARCO BUZZER BEATER PERIMETRAL */
+#buzzer-frame {
+    position: fixed;
+    inset: 0;
+    border: 14px solid transparent;
+    pointer-events: none;
+    z-index: 99999;
+    transition: border-color 0.1s ease;
+}
+#buzzer-frame.active {
+    border-color: #ff2247;
+    box-shadow: inset 0 0 100px #ff2247;
+    animation: buzzerFlash 0.2s infinite alternate;
+}
+@keyframes buzzerFlash {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
 
 .splash {
     position: absolute;
@@ -72,38 +94,126 @@ body {
     transform: translate(-50%, -50%);
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
-    background: radial-gradient(circle at center, #0f172a 0%, #000000 100%);
+    padding: 20px 40px;
+    background: radial-gradient(circle at center, #070a12 0%, #000000 100%);
     overflow: hidden;
 }
 
-.glass-panel {
+/* TOP COCKPIT BAR: RADAR DEL MANDO & MARCADOR */
+.top-cockpit-bar {
+    width: 1820px;
+    height: 54px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
     background: rgba(15, 23, 42, 0.7);
-    /* backdrop-filter removed for max performance */
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.05);
+    border: 2px solid #222d42;
+    border-radius: 12px;
+}
+
+.cockpit-brand {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #e2e8f0;
+}
+
+.mando-radar-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 18px;
+    border-radius: 20px;
+    background: #020305;
+    border: 2px solid #334155;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    transition: all 0.3s;
+}
+
+.mando-radar-badge.connected {
+    border-color: #00ff88;
+    color: #00ff88;
+    box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
+}
+
+.mando-radar-badge.disconnected {
+    border-color: #ff2247;
+    color: #ff2247;
+    box-shadow: 0 0 12px rgba(255, 34, 71, 0.3);
+}
+
+.radar-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #475569;
+}
+
+.mando-radar-badge.connected .radar-dot {
+    background: #00ff88;
+    box-shadow: 0 0 10px #00ff88;
+    animation: radarPulseAnim 1.2s infinite;
+}
+
+.mando-radar-badge.disconnected .radar-dot {
+    background: #ff2247;
+    box-shadow: 0 0 8px #ff2247;
+}
+
+@keyframes radarPulseAnim {
+    0% { transform: scale(0.85); opacity: 0.7; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.85); opacity: 0.7; }
+}
+
+.clock-status-tag {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 6px;
+}
+.clock-status-tag.running {
+    color: #00ff88;
+}
+.clock-status-tag.stopped {
+    color: #ff2247;
+}
+
+.glass-panel {
+    background: rgba(11, 16, 28, 0.85);
+    border: 2px solid #222d42;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(255,255,255,0.03);
 }
 
 .center-panel {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 70px);
     align-items: center;
     justify-content: space-evenly;
 }
 
 /* Row 1: Clock */
 .clock-box {
-    padding: 15px 50px;
+    padding: 10px 60px;
     background: #000000;
     border-radius: 20px;
-    border: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    border: 3px solid #222d42;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.9);
 }
-.large-clock { font-size: 210px; line-height: 1; letter-spacing: -4px; color: #ffffff !important; text-shadow: 0 0 30px rgba(255,255,255,0.8); }
+.large-clock {
+    font-size: 215px;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    color: var(--yellow-glow) !important;
+}
 
 /* Row 2: Scores */
 .scores-row {
@@ -117,43 +227,76 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 600px;
+    width: 620px;
 }
 
 .team-name {
-    font-size: 55px; line-height: 1;
+    font-size: 52px; line-height: 1;
     font-weight: 900;
     letter-spacing: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     color: #ffffff !important;
     text-transform: uppercase;
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
-    padding: 5px 20px;
-    border: 2px solid #334155;
-    border-radius: 15px;
+    background: linear-gradient(180deg, #161f30 0%, #0a0e17 100%) !important;
+    padding: 6px 24px;
+    border: 2px solid #2a374f;
+    border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-.score-wrapper {
-    padding: 15px 40px;
-    width: 100%;
-    text-align: center;
-    border-radius: 20px;
+.team-local-name {
+    border-color: #00ff88;
+    box-shadow: 0 0 15px rgba(0,255,136,0.3);
 }
 
-.huge-score { font-size: 280px; line-height: 1; letter-spacing: -10px; color: #ff0000 !important; text-shadow: 0 0 30px rgba(255,0,0,0.6); }
-.huge-score.triple-digit { font-size: 200px; line-height: 1; }
+.team-visita-name {
+    border-color: #ff2247;
+    box-shadow: 0 0 15px rgba(255,34,71,0.3);
+}
+
+.score-wrapper {
+    padding: 10px 30px;
+    width: 100%;
+    height: 310px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 20px;
+    background: #000000;
+    overflow: hidden;
+}
+
+.score-local-wrapper {
+    border-color: #00552b;
+}
+
+.score-visita-wrapper {
+    border-color: #660e1d;
+}
+
+.huge-score {
+    font-size: 280px;
+    line-height: 0.85;
+    letter-spacing: -8px;
+    width: 100%;
+    text-align: center;
+}
+
+.huge-score.triple-digit {
+    font-size: 195px;
+    letter-spacing: -6px;
+}
 
 .period-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 15px 30px;
-    width: 380px;
+    padding: 20px 40px;
+    width: 320px;
     background: rgba(15, 23, 42, 0.8) !important;
-    /* backdrop-filter removed for max performance */
     border: 2px solid #334155 !important;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -167,20 +310,7 @@ body {
     margin-bottom: 10px;
 }
 .period-wrapper .glow-yellow { color: #ffcc00 !important; text-shadow: 0 0 20px rgba(255,204,0,0.5); }
-.medium-score { font-size: 90px; line-height: 1; }
-
-.shot-clock-container { 
-    margin-top: 15px; 
-    text-align: center; 
-    background: #000000;
-    padding: 10px;
-    border-radius: 15px;
-    border: 3px solid #ff0000;
-    box-shadow: 0 0 20px rgba(255,0,0,0.3);
-    width: 100%;
-}
-.shot-clock-container .label { color: #ff4444 !important; font-size: 24px; margin-bottom: 5px; }
-.shot-clock-container .digital-number { color: #ff0000 !important; font-size: 120px; text-shadow: 0 0 20px rgba(255,0,0,0.8); }
+.medium-score { font-size: 160px; line-height: 1; }
 
 /* Row 3: Stats */
 .team-stats-row {

@@ -2,153 +2,297 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 const { SerialPort } = require('serialport');
 const { exec } = require('child_process');
+const fs = require('fs');
+const os = require('os');
 
-// app.disableHardwareAcceleration();
-// app.commandLine.appendSwitch('disable-software-rasterizer');
-// app.commandLine.appendSwitch('disable-gpu');
-
-let mainWindow;
-let mandoWindow;
+let mainWindow = null;
+let mandoWindow = null;
 let globalPort = null;
 
-const MODE = process.env.MODE || 'tv'; // Puede ser 'tv', 'mando' o 'ambos'
-const COMPORT = process.env.COMPORT || 'COM3';
+const MODE = process.env.MODE || 'tv'; // 'tv', 'mando' o 'ambos'
+const COMPORT = process.env.COMPORT || '';
 
-function createWindow() {
+function createTvWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (!mainWindow.isVisible()) mainWindow.show();
+    mainWindow.focus();
+    return mainWindow;
+  }
+
   let displays = screen.getAllDisplays();
   let externalDisplay = displays.find((display) => {
     return display.bounds.x !== 0 || display.bounds.y !== 0;
   });
 
-  if (MODE === 'tv' || MODE === 'ambos') {
-    let tvBounds = { x: 0, y: 0, width: 1280, height: 720 };
-    if (externalDisplay) {
-      console.log('Pantalla externa detectada, asignando TV a esta pantalla.');
-      tvBounds.x = externalDisplay.bounds.x;
-      tvBounds.y = externalDisplay.bounds.y;
-    }
-
-    mainWindow = new BrowserWindow({
-      x: tvBounds.x,
-      y: tvBounds.y,
-      width: 1280,
-      height: 720,
-      fullscreen: true, 
-      kiosk: true,
-      autoHideMenuBar: true,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
-        webSecurity: false
-      }
-    });
-    mainWindow.loadFile('index.html');
+  let tvBounds = { x: 0, y: 0, width: 1280, height: 720 };
+  if (externalDisplay) {
+    console.log('[TV] Pantalla externa detectada, asignando TV a pantalla secundaria.');
+    tvBounds.x = externalDisplay.bounds.x;
+    tvBounds.y = externalDisplay.bounds.y;
   }
 
-  if (MODE === 'mando' || MODE === 'ambos') {
-    mandoWindow = new BrowserWindow({
-      width: 1000,
-      height: 800,
-      x: 50,
-      y: 50,
-      autoHideMenuBar: true,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
-      }
-    });
-    mandoWindow.loadFile('mando.html');
+  mainWindow = new BrowserWindow({
+    x: tvBounds.x,
+    y: tvBounds.y,
+    width: 1280,
+    height: 720,
+    fullscreen: true,
+    kiosk: true,
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false
+    }
+  });
+
+  mainWindow.loadFile('index.html');
+  mainWindow.webContents.on('did-finish-load', () => {
+    const isConnected = !!(globalPort && globalPort.isOpen);
+    mainWindow.webContents.send('mando-status', { connected: isConnected, port: globalPort?.path });
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  return mainWindow;
+}
+
+function createMandoWindow() {
+  if (mandoWindow && !mandoWindow.isDestroyed()) {
+    if (!mandoWindow.isVisible()) mandoWindow.show();
+    mandoWindow.focus();
+    return mandoWindow;
+  }
+
+  mandoWindow = new BrowserWindow({
+    width: 1100,
+    height: 850,
+    x: 50,
+    y: 50,
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+
+  mandoWindow.loadFile('mando.html');
+  mandoWindow.webContents.on('did-finish-load', () => {
+    const isConnected = !!(globalPort && globalPort.isOpen);
+    mandoWindow.webContents.send('mando-status', { connected: isConnected, port: globalPort?.path });
+  });
+
+  mandoWindow.on('closed', () => {
+    mandoWindow = null;
+  });
+
+  return mandoWindow;
+}
+
+function createWindow() {
+  if (MODE === 'tv') {
+    createTvWindow();
+  } else if (MODE === 'mando') {
+    createMandoWindow();
+  } else if (MODE === 'ambos') {
+    createTvWindow();
+    createMandoWindow();
   }
 }
 
 async function autoDetectSerialPort() {
-  if (process.env.COMPORT) {
-    console.log(`Usando puerto forzado por el usuario: ${process.env.COMPORT}`);
-    return process.env.COMPORT;
+  if (COMPORT) {
+    console.log(`[Auto-Detect] Usando puerto forzado por variable de entorno: ${COMPORT}`);
+    return COMPORT;
   }
-  
+
   try {
     const ports = await SerialPort.list();
-    console.log("Puertos disponibles encontrados:", ports.map(p => p.path).join(", "));
-    
-    // Buscar puertos que tengan vendorId, o contengan ttyUSB, ttyACM o COM
-    const espPort = ports.find(p => p.vendorId || p.path.toUpperCase().includes('COM') || p.path.includes('ttyUSB') || p.path.includes('ttyACM'));
-    
+    console.log("[Auto-Detect] Puertos serie detectados en Windows:", ports.map(p => `${p.path} (${p.friendlyName || p.manufacturer || 'Generico'})`).join(", "));
+
+    // Prioridad 1: Chip UART ESP32 (CP210x de Silicon Labs [VID 10C4], CH340 [VID 1A86], FTDI [VID 0403])
+    const espPort = ports.find(p => {
+      const vId = (p.vendorId || '').toLowerCase();
+      const mfg = (p.manufacturer || '').toLowerCase();
+      const name = (p.friendlyName || '').toLowerCase();
+      return vId === '10c4' || vId === '1a86' || vId === '0403' ||
+             mfg.includes('silicon') || mfg.includes('ch340') || mfg.includes('espressif') ||
+             name.includes('cp210') || name.includes('ch340') || name.includes('uart') ||
+             p.path.includes('ttyUSB') || p.path.includes('ttyACM');
+    });
+
     if (espPort) {
-      console.log(`[Auto-Detect] Placa USB asignada: ${espPort.path} (${espPort.manufacturer || 'Desconocido'})`);
+      console.log(`[Auto-Detect] -> Placa ESP32 identificada en ${espPort.path} (${espPort.friendlyName || espPort.manufacturer})`);
       return espPort.path;
     }
-  
-} catch (err) {}
+
+    // Prioridad 2: Cualquier puerto serie con VID que NO sea un vínculo Bluetooth
+    const otherUsb = ports.find(p => p.vendorId && !p.friendlyName?.toLowerCase().includes('bluetooth'));
+    if (otherUsb) {
+      console.log(`[Auto-Detect] -> Puerto USB alternativo: ${otherUsb.path}`);
+      return otherUsb.path;
+    }
+  } catch (err) {
+    console.error("[Auto-Detect] Error buscando puertos serie:", err);
+  }
 
   return process.platform === 'linux' ? '/dev/ttyUSB0' : 'COM3';
 }
 
+function notifyStatus(connected, portName) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('mando-status', { connected, port: portName });
+  }
+  if (mandoWindow && !mandoWindow.isDestroyed()) {
+    mandoWindow.webContents.send('mando-status', { connected, port: portName });
+  }
+}
+
+function broadcastCommand(cmd, team, player, value) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('serial-command', { cmd, team, player, value });
+  }
+  if (mandoWindow && !mandoWindow.isDestroyed()) {
+    mandoWindow.webContents.send('serial-command', { cmd, team, player, value });
+  }
+}
+
+function initSerialPort(initialPort) {
+  try {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+
+    let activePortName = initialPort;
+
+    function connect() {
+      console.log(`[Serial] Intentando conectar con ESP32 en ${activePortName}...`);
+      
+      globalPort = new SerialPort({ path: activePortName, baudRate: 115200 }, function (err) {
+        if (err) {
+          console.log(`[Status] No se pudo abrir ${activePortName}: ${err.message}. Reintentando en 3s...`);
+          notifyStatus(false, activePortName);
+          setTimeout(async () => {
+            activePortName = await autoDetectSerialPort();
+            connect();
+          }, 3000);
+          return;
+        }
+
+        console.log(`[Status] Conectado exitosamente a ESP32 en ${activePortName}. MODO ACTIVO.`);
+        notifyStatus(true, activePortName);
+      });
+
+      globalPort.on('close', () => {
+        console.log(`[Status] Puerto ${activePortName} desconectado.`);
+        notifyStatus(false, activePortName);
+        setTimeout(async () => {
+          activePortName = await autoDetectSerialPort();
+          connect();
+        }, 3000);
+      });
+
+      globalPort.on('error', (err) => {
+        console.log(`[Status] Error en puerto serie: ${err.message}`);
+      });
+
+      let buffer = Buffer.alloc(0);
+
+      globalPort.on('data', (chunk) => {
+        buffer = Buffer.concat([buffer, chunk]);
+
+        // Procesar paquetes completos de 5 bytes
+        while (buffer.length >= 5) {
+          const cmd = buffer[0];
+          const team = buffer[1];
+          const player = buffer[2];
+          const value = buffer[3];
+          const checksum = buffer[4];
+
+          const calculatedChecksum = (cmd + team + player + value) & 0xFF;
+
+          if (checksum === calculatedChecksum) {
+            broadcastCommand(cmd, team, player, value);
+            buffer = buffer.subarray(5);
+          } else {
+            console.log(`[ESP32 Serial] Checksum invalido (${checksum} != ${calculatedChecksum}). Descartando 1 byte...`);
+            buffer = buffer.subarray(1);
+          }
+        }
+      });
+    }
+
+    connect();
+  } catch (error) {
+    console.log("Error critico inicializando el puerto serie:", error);
+  }
+}
+
 app.whenReady().then(async () => {
-  // HDMI-CEC: Encender TV y forzar fuente HDMI
+  // HDMI-CEC: Encender TV en Linux
   if (process.platform === 'linux') {
-    console.log("[CEC] Enviando se�al para encender la TV...");
     exec('echo "on 0" | cec-client -s -d 1', () => {
       exec('echo "as" | cec-client -s -d 1');
     });
   }
 
-  // Inicializar Puerto Serie con auto-detecci�n primero
   const portToUse = await autoDetectSerialPort();
-  initSerialPort(portToUse); 
+  initSerialPort(portToUse);
 
   app.on('activate', function () {
-    if (BrowserWindow.getAllWindows().length === 0 && globalPort && globalPort.isOpen) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-  
 
-  ipcMain.on('trigger-sync', (event) => {
-    if (globalPort && globalPort.isOpen) {
-      // Enviamos una r�faga de 10 bytes de 155 para garantizar que la placa ESP32
-      // lo reciba incluso si se descuadr� leyendo basura del inicio de Linux
-      const buf = Buffer.from([155, 155, 155, 155, 155, 155, 155, 155, 155, 155]);
-      globalPort.write(buf, (err) => {
-        if(err) console.log("Error enviando SYNC por Serial:", err);
-      });
-      console.log(`[Virtual] -> R�faga de Sincronizaci�n Enviada a la Receptora (155)`);
+  // Toggle de la pantalla gigante TV desde la consola de Mando
+  ipcMain.on('toggle-tv-window', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isVisible()) {
+        mainWindow.hide();
+      } else {
+        mainWindow.show();
+        mainWindow.focus();
+      }
     } else {
-      console.log(`[Virtual] -> Intent� enviar SYNC pero el puerto est� cerrado.`);
+      createTvWindow();
+    }
+  });
+
+  ipcMain.on('trigger-sync', () => {
+    if (globalPort && globalPort.isOpen) {
+      const buf = Buffer.from([155, 155, 155, 155, 155, 155, 155, 155, 155, 155]);
+      globalPort.write(buf);
+      console.log(`[Virtual] -> Rafaga SYNC (155) enviada a la ESP32`);
     }
   });
 
   ipcMain.on('virtual-command', (event, { cmd, team, player, value }) => {
-    
-    // 1. Si estamos en modo 'ambos' o 'tv' con el mando local, lo mandamos directo al tablero interno
-    if (mainWindow) {
+    // 1. Mandar al tablero de TV interno si existe
+    if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('serial-command', { cmd, team, player, value });
     }
-    
-    // 2. Si estamos en modo 'mando' o tenemos el hardware TX conectado, escribimos al Serial
+
+    // 2. Si hay hardware ESP32 por USB, enviar el paquete crudo de 5 bytes
     if (globalPort && globalPort.isOpen) {
       const checksum = (cmd + team + player + value) & 0xFF;
       const buf = Buffer.from([cmd, team, player, value, checksum]);
       globalPort.write(buf, (err) => {
-        if(err) console.log("Error enviando por Serial:", err);
+        if (err) console.log("Error enviando por Serial:", err);
       });
-      console.log(`[Mando Virtual] -> Enviado a USB: CMD:${cmd} T:${team} P:${player} V:${value}`);
+      console.log(`[Mando Virtual] -> USB Serial: CMD:${cmd} T:${team} P:${player} V:${value}`);
     }
   });
 
-  // --- CONTROLADORES WI-FI, KIOSCO Y USB ---
-  const fs = require('fs');
-  const os = require('os');
-  
-  // Crear carpeta local de publicidades si no existe
+  // --- ARCHIVOS Y PUBLICIDADES ---
   const adsFolder = path.join(os.homedir(), 'tablero', 'publicidades');
   if (!fs.existsSync(adsFolder)) {
     fs.mkdirSync(adsFolder, { recursive: true });
   }
 
-  // --- USB Y ARCHIVOS ---
   ipcMain.handle('get-ads-folder', () => adsFolder);
 
   ipcMain.handle('list-usbs', () => {
-    // En Linux, udiskie monta en /media/<usuario>
     const mediaPath = path.join('/media', os.userInfo().username);
     try {
       if (!fs.existsSync(mediaPath)) return [];
@@ -156,7 +300,7 @@ app.whenReady().then(async () => {
         name: folder,
         path: path.join(mediaPath, folder)
       }));
-    } catch(e) { return []; }
+    } catch (e) { return []; }
   });
 
   ipcMain.handle('list-files', (event, dirPath) => {
@@ -165,7 +309,7 @@ app.whenReady().then(async () => {
       return fs.readdirSync(dirPath)
         .filter(f => f.match(/\.(mp4|jpg|png|jpeg)$/i))
         .map(f => ({ name: f, path: path.join(dirPath, f) }));
-    } catch(e) { return []; }
+    } catch (e) { return []; }
   });
 
   ipcMain.handle('copy-file', (event, sourcePath, destName) => {
@@ -174,7 +318,7 @@ app.whenReady().then(async () => {
       const destPath = path.join(adsFolder, safeDestName);
       fs.copyFileSync(sourcePath, destPath);
       return { success: true };
-    } catch(e) {
+    } catch (e) {
       return { success: false, error: e.message };
     }
   });
@@ -184,7 +328,7 @@ app.whenReady().then(async () => {
       const safeFileName = path.basename(fileName);
       fs.unlinkSync(path.join(adsFolder, safeFileName));
       return { success: true };
-    } catch(e) { return { success: false }; }
+    } catch (e) { return { success: false }; }
   });
 
   // --- WI-FI ---
@@ -192,7 +336,6 @@ app.whenReady().then(async () => {
     return new Promise((resolve) => {
       exec('nmcli -t -f SSID,SIGNAL dev wifi', (error, stdout) => {
         if (error) {
-          console.log("Error escaneando Wi-Fi:", error);
           resolve([]);
           return;
         }
@@ -202,16 +345,15 @@ app.whenReady().then(async () => {
             const parts = line.split(':');
             return { ssid: parts[0], signal: parseInt(parts[1]) };
           })
-          .filter(n => n.ssid); // Filtrar redes sin nombre
-          
-        // Eliminar duplicados por SSID
+          .filter(n => n.ssid);
+
         const unique = [];
         const map = new Map();
         for (const item of networks) {
-            if(!map.has(item.ssid)){
-                map.set(item.ssid, true);
-                unique.push(item);
-            }
+          if (!map.has(item.ssid)) {
+            map.set(item.ssid, true);
+            unique.push(item);
+          }
         }
         resolve(unique);
       });
@@ -235,81 +377,3 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
-
-// L�gica de lectura del puerto Serie
-function initSerialPort(portName) {
-  try {
-    // Siempre abrimos la ventana, haya o no mando.
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
-
-    function connect() {
-      globalPort = new SerialPort({ path: portName, baudRate: 115200 }, function (err) {
-        if (err) {
-          console.log(`[Status] Mando desconectado en ${portName}. Modo Publicidad ACTIVO. Reintentando en 5s...`);
-          if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.send('mando-status', { connected: false });
-          }
-          setTimeout(connect, 5000);
-          return;
-        }
-        
-        console.log(`[Status] Conectado exitosamente a la ESP32 en ${portName}. MODO TABLERO ACTIVO.`);
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('mando-status', { connected: true });
-        }
-      });
-
-      globalPort.on('close', () => {
-        console.log('[Status] Puerto serie cerrado. Mando desconectado.');
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send('mando-status', { connected: false });
-        }
-        setTimeout(connect, 5000);
-      });
-
-      let buffer = Buffer.alloc(0);
-
-      globalPort.on('data', (chunk) => {
-        // Acumular datos entrantes
-        buffer = Buffer.concat([buffer, chunk]);
-        
-        // Procesar todos los paquetes completos de 5 bytes que tengamos en el buffer
-        while (buffer.length >= 5) {
-          const cmd = buffer[0];
-          const team = buffer[1];
-          const player = buffer[2];
-          const value = buffer[3];
-          const checksum = buffer[4];
-
-          // Validar integridad estructural: suma de los 4 primeros bytes truncada a 8 bits
-          const calculatedChecksum = (cmd + team + player + value) & 0xFF;
-          
-          if (checksum === calculatedChecksum) {
-            // console.log(`[Hardware ESP32] Comando Recibido -> CMD: ${cmd} | EQUIPO: ${team} | JUGADOR: ${player} | VALOR: ${value}`); // Muted to improve performance and reduce latency
-            
-            if (mainWindow) {
-              // Mandar los datos estructurados al Frontend
-              mainWindow.webContents.send('serial-command', { cmd, team, player, value });
-            }
-            if (mandoWindow) {
-              mandoWindow.webContents.send('serial-command', { cmd, team, player, value });
-            }
-            buffer = buffer.subarray(5); // Paquete v�lido, avanzamos 5 bytes
-          } else {
-            console.log(`[Hardware ESP32] ?? ERROR: Checksum inv�lido (Esperado: ${calculatedChecksum}, Recibido: ${checksum}). Descartando 1 byte para re-sincronizar...`);
-            buffer = buffer.subarray(1); // �CLAVE! Solo avanzamos 1 byte si falla, para buscar el inicio real del pr�ximo paquete
-          }
-        }
-      });
-    }
-
-    connect(); // <-- INICIO DE LA CONEXI�N
-  } catch (error) {
-    console.log("Error cr�tico inicializando el puerto serie:", error);
-  }
-}
-
-
-

@@ -6,8 +6,8 @@ const homeScoreEl = document.getElementById('home-score');
 const guestScoreEl = document.getElementById('guest-score');
 const mainClockEl = document.getElementById('main-clock');
 
-// Estado Global
-let isAdMode = true;
+// Estado Global (Siempre en MODO TABLERO, ignorando publicidad)
+let isAdMode = false;
 
 // ==========================================
 // SISTEMA INTELIGENTE DE AUTO-ESCALADO
@@ -20,38 +20,29 @@ function adjustScale() {
     // Calculamos el factor de escala para mantener la proporción exacta
     const scale = Math.min(window.innerWidth / baseWidth, window.innerHeight / baseHeight);
     
-    scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
-    scoreboard.style.transformOrigin = 'center center';
-    
-    // Aplicamos escala a la pantalla de carga para que tampoco se deforme
-    const logoContainer = document.querySelector('.logo-container');
-    if(logoContainer) logoContainer.style.transform = `scale(${scale})`;
+    if (scoreboard) {
+        scoreboard.style.transform = `translate(-50%, -50%) scale(${scale})`;
+        scoreboard.style.transformOrigin = 'center center';
+    }
 }
 
 window.addEventListener('resize', adjustScale);
 adjustScale();
 // ==========================================
 
-// Simular que el sistema carga y muestra el tablero (Animación)
-setTimeout(() => {
-    splashScreen.style.opacity = '0';
-    setTimeout(() => {
-        splashScreen.classList.add('hidden');
-        if (!isAdMode) {
-            scoreboard.classList.remove('hidden');
-            
-        } else {
-            const adsContainer = document.getElementById('ads-container');
-            if (adsContainer) {
-                adsContainer.classList.remove('hidden');
-                adsContainer.style.display = 'flex';
-                if (typeof fetchAds === 'function') {
-                    fetchAds().then(() => { if (typeof playNextAd === 'function') playNextAd(); });
-                }
-            }
-        }
-    }, 1500);
-}, 2000);
+// Mostrar el tablero anotador directamente y ocultar carga/publicidad
+if (splashScreen) {
+    splashScreen.style.display = 'none';
+    splashScreen.classList.add('hidden');
+}
+if (scoreboard) {
+    scoreboard.classList.remove('hidden');
+}
+const adsContainer = document.getElementById('ads-container');
+if (adsContainer) {
+    adsContainer.style.display = 'none';
+    adsContainer.classList.add('hidden');
+}
 
 // ==========================================
 // ESTADO DEL PARTIDO (Reglas FIBA)
@@ -132,6 +123,17 @@ function updateUI() {
     document.getElementById('home-bonus').classList.toggle('active', state.team_fouls.local >= 5);
     document.getElementById('guest-bonus').classList.toggle('active', state.team_fouls.visita >= 5);
     
+    const clockStatusTag = document.getElementById('clock-status-tag');
+    if (clockStatusTag) {
+        if (state.clock_running) {
+            clockStatusTag.className = 'clock-status-tag running';
+            clockStatusTag.innerHTML = '<span>●</span> EN JUEGO';
+        } else {
+            clockStatusTag.className = 'clock-status-tag stopped';
+            clockStatusTag.innerHTML = '<span>■</span> DETENIDO';
+        }
+    }
+
     const minutes = Math.floor(state.clock / 60);
     const seconds = state.clock % 60;
     mainClockEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
@@ -150,7 +152,7 @@ function toggleClock() {
                 state.clock = 0;
                 clearInterval(clockInterval);
                 state.clock_running = false;
-                // Aquí sonaría la chicharra
+                playBuzzerSound(true); // Activa la bocina física de la ESP32 al llegar a 00:00
             } else {
                 state.clock = Math.ceil((targetTime - now) / 1000);
             }
@@ -160,6 +162,61 @@ function toggleClock() {
         clearInterval(clockInterval);
     }
     updateUI();
+}
+
+let mandoRadarTimer = null;
+function markMandoAlive() {
+    const radar = document.getElementById('mando-radar');
+    const statusText = document.getElementById('mando-status-text');
+    if (radar && statusText) {
+        radar.className = 'mando-radar-badge connected';
+        statusText.innerText = 'MANDO: CONECTADO';
+        
+        if (mandoRadarTimer) clearTimeout(mandoRadarTimer);
+        mandoRadarTimer = setTimeout(() => {
+            radar.className = 'mando-radar-badge disconnected';
+            statusText.innerText = 'MANDO: DESCONECTADO';
+        }, 3500);
+    }
+}
+
+let audioCtx = null;
+function playBuzzerSound(triggerHardware = false) {
+    try {
+        const buzzerFrame = document.getElementById('buzzer-frame');
+        if (buzzerFrame) {
+            buzzerFrame.classList.add('active');
+            setTimeout(() => buzzerFrame.classList.remove('active'), 2000);
+        }
+
+        if (triggerHardware && typeof ipcRenderer !== 'undefined') {
+            ipcRenderer.send('virtual-command', { cmd: 6, team: 0, player: 0, value: 0 });
+        }
+
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(260, now);
+        osc2.type = 'sawtooth';
+        osc2.frequency.setValueAtTime(390, now);
+
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.8);
+        osc2.stop(now + 1.8);
+    } catch(e) {}
 }
 
 function adjustTargetTime() {
@@ -263,19 +320,24 @@ if (window.require) {
             
         }
 
-        // Renovar el tiempo de vida (10 segundos sin señal = Mando apagado/lejos)
-        clearTimeout(heartbeatTimeout);
-        heartbeatTimeout = setTimeout(async () => {
-            if (!isAdMode) {
-                isAdMode = true;
-                scoreboard.classList.add('hidden');
-                
-                adsContainer.classList.remove('hidden');
-                adsContainer.style.display = 'flex';
-                await fetchAds();
-                playNextAd();
-            }
-        }, 10000);
+        // Si el hardware físico NO está conectado por USB, aplicamos timeout de desconexión de 10s
+        if (!hardwareConnected) {
+            clearTimeout(heartbeatTimeout);
+            heartbeatTimeout = setTimeout(async () => {
+                if (!isAdMode && !hardwareConnected) {
+                    isAdMode = true;
+                    scoreboard.classList.add('hidden');
+                    
+                    adsContainer.classList.remove('hidden');
+                    adsContainer.style.display = 'flex';
+                    await fetchAds();
+                    playNextAd();
+                }
+            }, 10000);
+        }
+
+        // Registrar que el mando / celular está activo y comunicándose
+        markMandoAlive();
 
         if (cmd === 254) return; // Si solo era un latido de presencia, no procesar el switch
 
@@ -320,8 +382,9 @@ if (window.require) {
                 if (state.period > 9) state.period = 9;
                 break;
                 
-            case 6: // Chicharra
+            case 6: // Chicharra / Bocina (activa también el relé físico)
                 console.log("CHICHARRA (Bocina)!");
+                playBuzzerSound(true);
                 break;
                 
             case 7: // Set Time (team = minutes, value = seconds)
@@ -358,27 +421,10 @@ if (window.require) {
                 state.shot_clock = value;
                 break;
 
-            case 200: { // REPORTE DE ESTADO DE CONEXION (Unicast)
-                // team = vinculados, player = activos
-                const lblVinculadas = document.getElementById('dash-vinculadas');
-                const lblOnline = document.getElementById('dash-online');
-                const ledStatus = document.getElementById('dash-status-led');
-                
-                if (lblVinculadas && lblOnline && ledStatus) {
-                    lblVinculadas.innerText = `${team}/18`;
-                    lblOnline.innerText = player;
-                    
-                    if (player > 0) {
-                        ledStatus.style.background = '#22c55e'; // Verde
-                        ledStatus.style.boxShadow = '0 0 8px #22c55e';
-                    } else if (team > 0) {
-                        ledStatus.style.background = '#ef4444'; // Rojo (desconectado)
-                        ledStatus.style.boxShadow = '0 0 8px #ef4444';
-                    } else {
-                        ledStatus.style.background = '#f59e0b'; // Naranja (ninguno vinculado)
-                        ledStatus.style.boxShadow = '0 0 8px #f59e0b';
-                    }
-                }
+            case 200: { // REPORTE DE ESTADO DE CONEXION (KeepAlive del celular)
+                markMandoAlive();
+                return;
+            }
                 
                 // Mostrar u Ocultar Reloj 24s
                 const shotClockEl = document.getElementById('shot-clock');
@@ -524,36 +570,34 @@ if (window.require) {
         }, 500); // Esperar medio segundo al desvanecimiento antes de cargar la próxima
     }
 
+    let hardwareConnected = false;
+
     ipcRenderer.on('mando-status', async (event, { connected }) => {
-        // Solo reaccionamos si se desconecta físicamente el USB
-        if (!connected) {
-            // MODO PUBLICIDAD (Mando ausente)
-            if (!isAdMode) {
-                isAdMode = true;
-                scoreboard.classList.add('hidden');
-                
-                adsContainer.classList.remove('hidden');
-                adsContainer.style.display = 'flex';
-                await fetchAds();
-                playNextAd();
+        hardwareConnected = !!connected;
+        console.log(`[UI] Estado de ESP32 USB recibido: ${hardwareConnected ? 'CONECTADO' : 'DESCONECTADO'}`);
+        
+        if (hardwareConnected) {
+            // MODO TABLERO (ESP32 presente en el USB)
+            if (isAdMode) {
+                isAdMode = false;
+                if (typeof adTimeout !== 'undefined' && adTimeout) clearTimeout(adTimeout);
+                if (typeof adVideo !== 'undefined' && adVideo) {
+                    try { adVideo.pause(); } catch(e){}
+                }
+                if (adsContainer) {
+                    adsContainer.classList.add('hidden');
+                    adsContainer.style.display = 'none';
+                }
+                if (scoreboard) {
+                    scoreboard.classList.remove('hidden');
+                }
+                console.log("[UI] MODO TABLERO ACTIVO");
             }
+        } else {
+            // Se ignora la publicidad: el tablero se mantiene siempre en pantalla
+            console.log("[UI] ESP32 Desconectada de USB (Tablero visible)");
         }
     });
-
-    
-    // Auto-actualizar Sponsors cada 30 segundos
-    setInterval(async () => {
-        if (navigator.onLine) {
-            try {
-                
-            } catch(e){}
-        }
-    }, 30000);
-
-    // Iniciar publicidad si arrancamos en ese modo
-    if (isAdMode) {
-        fetchAds().then(() => { if (typeof playNextAd === 'function') playNextAd(); });
-    }
 }
 
 // Configuración visual según el MODO (Mando vs TV)
