@@ -12,6 +12,29 @@ let globalPort = null;
 const MODE = process.env.MODE || 'tv'; // 'tv', 'mando' o 'ambos'
 const COMPORT = process.env.COMPORT || '';
 
+// ========================================================
+// SISTEMA DE REGISTRO DIAGNÓSTICO DETALLADO (LOG PERSISTENTE)
+// ========================================================
+const logPaths = [
+  path.join(__dirname, 'tablero_debug.log'),
+  path.join(os.homedir(), 'tablero_debug.log'),
+  '/home/vboxuser/tablero_debug.log',
+  '/home/chanca/tablero_debug.log'
+];
+
+function writeDiagLog(msg) {
+  const timestamp = new Date().toISOString();
+  const line = `[${timestamp}] ${msg}\n`;
+  console.log(msg);
+  for (const p of logPaths) {
+    try {
+      fs.appendFileSync(p, line);
+    } catch(e) {}
+  }
+}
+
+writeDiagLog(`=== INICIO DE SESIÓN TABLERO KIOSCO === (Plataforma: ${process.platform}, Arch: ${process.arch}, Usuario: ${os.userInfo().username})`);
+
 function createTvWindow() {
   if (mainWindow && !mainWindow.isDestroyed()) {
     if (!mainWindow.isVisible()) mainWindow.show();
@@ -104,7 +127,7 @@ function createWindow() {
 
 async function autoDetectSerialPort() {
   if (COMPORT) {
-    console.log(`[Auto-Detect] Usando puerto forzado por variable de entorno: ${COMPORT}`);
+    writeDiagLog(`[Auto-Detect] Usando puerto forzado por variable de entorno: ${COMPORT}`);
     return COMPORT;
   }
 
@@ -114,12 +137,12 @@ async function autoDetectSerialPort() {
     for (let i = 0; i < 5; i++) {
       const usbPath = `/dev/ttyUSB${i}`;
       if (fs.existsSync(usbPath)) {
-        console.log(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
+        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
         return usbPath;
       }
       const acmPath = `/dev/ttyACM${i}`;
       if (fs.existsSync(acmPath)) {
-        console.log(`[Auto-Detect Linux] Encontrado puerto CDC/ACM activo: ${acmPath}`);
+        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto CDC/ACM activo: ${acmPath}`);
         return acmPath;
       }
     }
@@ -127,7 +150,7 @@ async function autoDetectSerialPort() {
 
   try {
     const ports = await SerialPort.list();
-    console.log("[Auto-Detect] Puertos serie detectados:", ports.map(p => `${p.path} (${p.friendlyName || p.manufacturer || 'Generico'})`).join(", "));
+    writeDiagLog(`[Auto-Detect] Puertos serie detectados (${ports.length}): ` + ports.map(p => `${p.path} [VID:${p.vendorId || 'none'} PID:${p.productId || 'none'}] (${p.friendlyName || p.manufacturer || 'Generico'})`).join(", "));
 
     // Prioridad 1: Chip UART ESP32 (CP210x [10C4], CH340 [1A86], FTDI [0403], Espressif)
     const espPort = ports.find(p => {
@@ -141,18 +164,18 @@ async function autoDetectSerialPort() {
     });
 
     if (espPort) {
-      console.log(`[Auto-Detect] -> Placa ESP32 identificada en ${espPort.path} (${espPort.friendlyName || espPort.manufacturer})`);
+      writeDiagLog(`[Auto-Detect] -> Placa ESP32 identificada en ${espPort.path} (${espPort.friendlyName || espPort.manufacturer})`);
       return espPort.path;
     }
 
     // Prioridad 2: Cualquier puerto serie con VID que NO sea un vínculo Bluetooth
     const otherUsb = ports.find(p => p.vendorId && !p.friendlyName?.toLowerCase().includes('bluetooth'));
     if (otherUsb) {
-      console.log(`[Auto-Detect] -> Puerto USB alternativo: ${otherUsb.path}`);
+      writeDiagLog(`[Auto-Detect] -> Puerto USB alternativo: ${otherUsb.path}`);
       return otherUsb.path;
     }
   } catch (err) {
-    console.error("[Auto-Detect] Error buscando puertos serie:", err);
+    writeDiagLog(`[Auto-Detect] Error buscando puertos serie: ${err.message}`);
   }
 
   if (process.platform === 'linux') {
@@ -165,6 +188,7 @@ async function autoDetectSerialPort() {
 }
 
 function notifyStatus(connected, portName) {
+  writeDiagLog(`[Notificación Status] Mando: ${connected ? 'CONECTADO' : 'DESCONECTADO'} en ${portName}`);
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('mando-status', { connected, port: portName });
   }
@@ -174,6 +198,7 @@ function notifyStatus(connected, portName) {
 }
 
 function broadcastCommand(cmd, team, player, value) {
+  writeDiagLog(`[Paquete Rx] cmd=${cmd}, team=${team}, player=${player}, value=${value}`);
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('serial-command', { cmd, team, player, value });
   }
@@ -191,11 +216,11 @@ function initSerialPort(initialPort) {
     let activePortName = initialPort;
 
     function connect() {
-      console.log(`[Serial] Intentando conectar con ESP32 en ${activePortName}...`);
+      writeDiagLog(`[Serial] Intentando conectar con ESP32 en ${activePortName}...`);
       
       globalPort = new SerialPort({ path: activePortName, baudRate: 115200 }, function (err) {
         if (err) {
-          console.log(`[Status] No se pudo abrir ${activePortName}: ${err.message}. Reintentando en 3s...`);
+          writeDiagLog(`[Status] Error abriendo ${activePortName}: ${err.message}. Reintentando en 3s...`);
           notifyStatus(false, activePortName);
           setTimeout(async () => {
             activePortName = await autoDetectSerialPort();
@@ -204,12 +229,12 @@ function initSerialPort(initialPort) {
           return;
         }
 
-        console.log(`[Status] Conectado exitosamente a ESP32 en ${activePortName}. MODO ACTIVO.`);
+        writeDiagLog(`[Status] Conectado exitosamente a ESP32 en ${activePortName}. MODO ACTIVO.`);
         notifyStatus(true, activePortName);
       });
 
       globalPort.on('close', () => {
-        console.log(`[Status] Puerto ${activePortName} desconectado.`);
+        writeDiagLog(`[Status] Puerto ${activePortName} desconectado.`);
         notifyStatus(false, activePortName);
         setTimeout(async () => {
           activePortName = await autoDetectSerialPort();
@@ -218,7 +243,7 @@ function initSerialPort(initialPort) {
       });
 
       globalPort.on('error', (err) => {
-        console.log(`[Status] Error en puerto serie: ${err.message}`);
+        writeDiagLog(`[Status] Error en puerto serie: ${err.message}`);
       });
 
       let buffer = Buffer.alloc(0);
