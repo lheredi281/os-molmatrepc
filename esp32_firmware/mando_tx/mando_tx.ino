@@ -67,17 +67,25 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   }
 }
 
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
   const uint8_t *mac = info->src_addr;
+#else
+void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len) {
+#endif
   
   // A. MODO EMPAREJAMIENTO: Una TV responde con 0x98 (ACK de SYNC)
   if (isPairingMode && len == 5 && incomingData[0] == 0x98) {
+    Serial.printf("\n[TX SYNC] >>> ¡RESPUESTA DE TV RECIBIDA (0x98)! <<<\n");
+    Serial.printf("[TX SYNC] MAC de la TV: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     
     // 1. Chequear si la TV ya existe en nuestra agenda
     bool exists = false;
     for (int i = 0; i < MAX_TVS; i++) {
       if (memcmp(tv_macs[i], mac, 6) == 0) {
         exists = true;
+        Serial.printf("[TX SYNC] Esta TV ya estaba guardada en el Slot #%d.\n", i+1);
         break;
       }
     }
@@ -101,7 +109,8 @@ void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
           peerInfo.encrypt = false;
           esp_now_add_peer(&peerInfo);
 
-          Serial.printf("[INFO] Nuevo Tablero %d Guardado!\n", i+1);
+          Serial.printf("[TX SYNC] ¡NUEVA TV GUARDADA EN MEMORIA! Slot #%d de %d.\n", i+1, MAX_TVS);
+          Serial.println("[TX SYNC] ========================================================\n");
           break;
         }
       }
@@ -155,6 +164,7 @@ void setup() {
 
   // Cargar MACs guardadas de las TVs
   preferences.begin("mando_tv", false);
+  int cargadas = 0;
   for (int i = 0; i < MAX_TVS; i++) {
     char key[10];
     sprintf(key, "tv_%d", i);
@@ -162,6 +172,7 @@ void setup() {
     if (len == 6) {
       uint8_t emptyMac[6] = {0,0,0,0,0,0};
       if (memcmp(tv_macs[i], emptyMac, 6) != 0) {
+        cargadas++;
         esp_now_peer_info_t peerInfo = {};
         memcpy(peerInfo.peer_addr, tv_macs[i], 6);
         peerInfo.channel = 1;
@@ -188,6 +199,19 @@ void setup() {
     has_24s = false;
   }
 
+  // MAC por defecto de la TV / Receptor vinculada directamente: 20:50:0d:1b:95:dc
+  const uint8_t DEFAULT_TV_MAC[6] = {0x20, 0x50, 0x0D, 0x1B, 0x95, 0xDC};
+  memcpy(tv_macs[0], DEFAULT_TV_MAC, 6);
+  preferences.putBytes("tv_0", tv_macs[0], 6);
+
+  esp_now_peer_info_t tvPeer = {};
+  memcpy(tvPeer.peer_addr, DEFAULT_TV_MAC, 6);
+  tvPeer.channel = 1;
+  tvPeer.encrypt = false;
+  if (!esp_now_is_peer_exist(DEFAULT_TV_MAC)) {
+    esp_now_add_peer(&tvPeer);
+  }
+
   // Registrar Broadcast para enviar emparejamientos a las que aún no conocemos
   esp_now_peer_info_t bcastInfo = {};
   memcpy(bcastInfo.peer_addr, broadcastAddress, 6);
@@ -196,6 +220,20 @@ void setup() {
   esp_now_add_peer(&bcastInfo);
 
   digitalWrite(LED_SYNC_STATUS, HIGH);
+
+  Serial.println("\n========================================================");
+  Serial.println("[TX] MANDO TRANSMISOR ESP32 INICIADO");
+  Serial.printf("[TX] MAC propia del Mando: %s\n", WiFi.macAddress().c_str());
+  Serial.println("[TX] Canal Wi-Fi ESP-NOW: 1");
+  Serial.printf("[TX] Pantallas / TVs vinculadas en memoria: %d de %d\n", cargadas, MAX_TVS);
+  if (cargadas == 0) {
+    Serial.println("[TX AVISO] ¡No hay ninguna TV vinculada aún! Presiona el botón 23 (SYNC).");
+  }
+  if (has_24s) {
+    Serial.printf("[TX] Reloj 24S vinculado: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                  mac_24s[0], mac_24s[1], mac_24s[2], mac_24s[3], mac_24s[4], mac_24s[5]);
+  }
+  Serial.println("========================================================\n");
 }
 
 void enviarATodosUnicast(struct_message *data) {
@@ -209,7 +247,7 @@ void enviarATodosUnicast(struct_message *data) {
   }
   
   if (vinculados == 0) {
-    Serial.println("No hay ningun Tablero vinculado. Presiona SYNC en la PC o en la placa.");
+    Serial.println("[TX AVISO] Ningún tablero vinculado. Presiona SYNC en la PC y luego en el Mando.");
   }
 }
 
@@ -219,15 +257,19 @@ void loop() {
   if (isPairingMode) {
     digitalWrite(LED_SYNC_STATUS, (millis() / 200) % 2);
     myData.cmd = 0x99;
+    myData.team = 0;
+    myData.player = 0;
+    myData.value = 0;
     myData.checksum = 0x99;
     esp_now_send(broadcastAddress, (uint8_t *)&myData, 5); // Gritamos para que escuchen
 
+    Serial.println("[TX SYNC] Transmitiendo baliza 0x99 (Buscando Receptores en el aire)...");
     delay(500);
 
     if (millis() - pairingStartTime > 15000) {
       isPairingMode = false;
       digitalWrite(LED_SYNC_STATUS, HIGH);
-      Serial.println("Fin del emparejamiento.");
+      Serial.println("\n[TX SYNC] Tiempo de emparejamiento finalizado (15s terminados).\n");
     }
     return;
   }
@@ -287,7 +329,11 @@ void loop() {
           comandoActivadoTime = 0; // Resetear
         } else {
           // Si NO apretaron comando antes, es un SYNC NORMAL
-          Serial.println("Entrando a Modo Emparejamiento. Buscando Tableros...");
+          Serial.println("\n[TX] ========================================================");
+          Serial.println("[TX] >>> BOTON FISICO 23 (SYNC) PRESIONADO <<<");
+          Serial.println("[TX] Entrando en Modo Emparejamiento. Buscando Receptores/TVs...");
+          Serial.println("[TX] Tienes 15 segundos. Transmitiendo señal al aire...");
+          Serial.println("[TX] ========================================================");
           isPairingMode = true;
           pairingStartTime = millis();
           valid = false;
@@ -297,6 +343,7 @@ void loop() {
     }
 
     if (valid) {
+      Serial.printf("[TX BOTÓN] Tecla #%d -> CMD:%d | EQ:%d | VAL:%d\n", key, c, t, v);
       myData.cmd = c; myData.team = t; myData.player = p; myData.value = v;
       myData.checksum = (c + t + p + v) & 0xFF;
       enviarATodosUnicast(&myData);

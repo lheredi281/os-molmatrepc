@@ -2,346 +2,434 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consola Táctil FIBA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Consola Mesa de Control - Tablero Montmartre</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Share+Tech+Mono&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #0f172a;
-            --panel-bg: rgba(30, 41, 59, 0.7);
-            --border-light: rgba(255, 255, 255, 0.1);
+            --bg-base: #0b0f19;
+            --panel-bg: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             
-            --green-btn: linear-gradient(145deg, #22c55e, #16a34a);
-            --green-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            --green-btn: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+            --green-bevel: #4ade80;
+            --green-shadow: 0 5px 0 #15803d, 0 8px 18px rgba(34, 197, 94, 0.35);
             
-            --blue-btn: linear-gradient(145deg, #3b82f6, #2563eb);
-            --blue-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            --blue-btn: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            --blue-bevel: #60a5fa;
+            --blue-shadow: 0 5px 0 #1d4ed8, 0 8px 18px rgba(59, 130, 246, 0.35);
             
-            --red-btn: linear-gradient(145deg, #ef4444, #dc2626);
-            --red-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            --red-btn: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+            --red-bevel: #f87171;
+            --red-shadow: 0 5px 0 #b91c1c, 0 8px 18px rgba(239, 68, 68, 0.35);
+
+            --orange-btn: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+            --orange-shadow: 0 5px 0 #c2410c, 0 8px 18px rgba(249, 115, 22, 0.35);
+
+            --emerald-btn: linear-gradient(180deg, #10b981 0%, #059669 100%);
+            --emerald-shadow: 0 5px 0 #047857;
             
-            --yellow-btn: linear-gradient(145deg, #facc15, #ca8a04);
-            --yellow-shadow: 0 4px 20px rgba(234, 179, 8, 0.5);
+            --dark-btn: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+            --dark-shadow: 0 5px 0 #0f172a, 0 6px 12px rgba(0, 0, 0, 0.5);
             
-            --dark-btn: linear-gradient(145deg, #334155, #1e293b);
-            --dark-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-            
-            --purple-btn: linear-gradient(145deg, #a855f7, #7e22ce);
-            --purple-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            --purple-btn: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
+            --purple-shadow: 0 5px 0 #6b21a8;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
 
         body {
             background-color: var(--bg-base);
-            background-image: radial-gradient(circle at 50% -20%, #1e293b, #0f172a 80%);
+            background-image: radial-gradient(circle at 50% 30%, #1e293b, #0b0f19 85%);
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             height: 100vh; width: 100vw;
-            display: flex; justify-content: center; align-items: stretch;
-            padding: 20px;
+            display: flex; flex-direction: column;
             overflow: hidden;
+            padding: 12px 18px;
         }
 
-                .dashboard {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 1200px; height: 750px;
-            transform: translate(-50%, -50%);
-            display: flex; gap: 20px;
+        /* BARRA SUPERIOR */
+        .top-navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 8px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .app-title {
+            font-size: 15px; font-weight: 900; letter-spacing: 2px;
+            color: #38bdf8; text-transform: uppercase;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .header-actions {
+            display: flex; align-items: center; gap: 14px;
+        }
+        .btn-toggle-tv {
+            background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
+            border: 1px solid #38bdf8;
+            border-radius: 10px;
+            color: #fff;
+            padding: 7px 16px;
+            font-weight: 900;
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #075985;
+            transition: all 0.1s;
+        }
+        .btn-toggle-tv:active { transform: translateY(2px); box-shadow: 0 1px 0 #075985; }
+
+        .hardware-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: #090d16;
+            border: 1px solid #334155;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .led-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ef4444; box-shadow: 0 0 8px #ef4444;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .led-dot.green {
+            background: #22c55e; box-shadow: 0 0 10px #22c55e;
         }
 
-        /* Glass Panels */
+        /* CONTENEDOR PRINCIPAL DASHBOARD */
+        .dashboard {
+            flex: 1;
+            display: flex; gap: 16px;
+            min-height: 0;
+        }
+
+        /* PANELES FÍSICOS */
         .panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-light);
-            border-radius: 24px;
-            padding: 25px;
+            border: 2px solid #334155;
+            border-radius: 20px;
+            padding: 16px;
             display: flex; flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 10px 25px rgba(0,0,0,0.6);
+            justify-content: space-between;
         }
-        .panel.side { flex: 1; }
-        .panel.center { flex: 1.5; }
+        .panel.side { flex: 1.1; }
+        .panel.center { flex: 1.6; }
 
         .panel-header {
-            text-align: center; font-size: 22px; font-weight: 800;
-            letter-spacing: 4px; padding-bottom: 15px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--border-light);
+            text-align: center; font-size: 17px; font-weight: 900;
+            letter-spacing: 3px; padding: 6px 0;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 10px;
             text-transform: uppercase;
         }
-        .header-local { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,0.5); }
-        .header-visita { color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.5); }
-        .header-mesa { color: #f8fafc; }
+        .header-local { color: #4ade80; text-shadow: 0 0 10px rgba(74,222,128,0.4); }
+        .header-visita { color: #60a5fa; text-shadow: 0 0 10px rgba(96,165,250,0.4); }
+        .header-mesa { color: #ffffff; }
 
-        /* Buttons Structure */
+        /* MARCADOR DIGITAL INTEGRADO EN CADA PANEL */
+        .live-score-box {
+            background: #030712;
+            border: 2px solid #1f2937;
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex; flex-direction: column; align-items: center;
+            margin-bottom: 12px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+        }
+        .live-score-box.local { border-color: rgba(34, 197, 94, 0.4); }
+        .live-score-box.visita { border-color: rgba(59, 130, 246, 0.4); }
+
+        .score-digits {
+            font-family: 'Orbitron', monospace;
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: 2px;
+        }
+        .digits-local { color: #22c55e; text-shadow: 0 0 20px rgba(34,197,94,0.6); }
+        .digits-visita { color: #3b82f6; text-shadow: 0 0 20px rgba(59,130,246,0.6); }
+
+        .score-meta-row {
+            display: flex; justify-content: space-between; width: 100%;
+            margin-top: 6px; font-size: 12px; font-weight: 800;
+            color: #94a3b8; letter-spacing: 1px;
+            border-top: 1px solid #1e293b; padding-top: 6px;
+        }
+        .bonus-badge {
+            background: #374151; color: #9ca3af;
+            padding: 2px 8px; border-radius: 6px; font-size: 11px;
+        }
+        .bonus-badge.active {
+            background: #dc2626; color: #fff;
+            box-shadow: 0 0 10px #dc2626;
+        }
+
+        /* RELOJ CENTRAL INTEGRADO */
+        .clock-hero-box {
+            background: #030712;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            padding: 12px;
+            display: flex; flex-direction: column; align-items: center;
+            margin-bottom: 12px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.9);
+            transition: border-color 0.2s;
+        }
+        .clock-hero-box.running {
+            border-color: #22c55e;
+            box-shadow: inset 0 0 20px rgba(34, 197, 94, 0.2), 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        .clock-meta-bar {
+            display: flex; justify-content: space-between; width: 100%;
+            font-size: 12px; font-weight: 800; letter-spacing: 1px;
+            color: #94a3b8; margin-bottom: 4px;
+        }
+        .clock-state-tag {
+            padding: 2px 8px; border-radius: 6px; font-weight: 900; font-size: 11px;
+            background: #374151; color: #d1d5db;
+        }
+        .clock-state-tag.running {
+            background: #15803d; color: #bbf7d0; box-shadow: 0 0 8px #22c55e;
+        }
+        .clock-digits {
+            font-family: 'Orbitron', monospace;
+            font-size: 68px; font-weight: 900; line-height: 1;
+            color: #f8fafc; letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.4);
+        }
+        .clock-digits.running {
+            color: #4ade80; text-shadow: 0 0 25px rgba(74,222,128,0.7);
+        }
+
+        /* BOTONERAS FÍSICAS */
         .btn-grid {
-            display: flex; flex-direction: column; gap: 20px; flex: 1;
-            justify-content: center;
+            display: flex; flex-direction: column; gap: 10px; flex: 1;
+            justify-content: space-between;
         }
-        .row { display: flex; justify-content: space-evenly; gap: 15px; width: 100%; }
-        
-        .control-group {
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-        }
+        .row { display: flex; justify-content: space-evenly; gap: 8px; width: 100%; align-items: center; }
+        .control-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .label { font-size: 10.5px; font-weight: 800; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
 
-        .label {
-            font-size: 12px; font-weight: 600; color: #94a3b8;
-            letter-spacing: 1px; text-transform: uppercase;
-        }
-
-        /* Modern Buttons */
         button {
             border: none; outline: none; cursor: pointer;
-            border-radius: 16px;
-            color: white; font-weight: 800; font-family: 'Inter', sans-serif;
-            font-size: 24px;
-            display: flex; justify-content: center; align-items: center;
-            transition: transform 0.1s, box-shadow 0.1s, filter 0.2s;
-            position: relative; overflow: hidden;
+            border-radius: 14px;
+            color: white; font-weight: 900; font-family: 'Inter', sans-serif;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative;
+            transition: all 0.08s ease;
         }
-        
-        button::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(rgba(255,255,255,0.1), transparent);
-            border-radius: 16px; pointer-events: none;
-        }
-
         button:active {
-            transform: scale(0.95);
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.8) !important;
             filter: brightness(0.9);
         }
 
-        /* Button Colors */
-        .btn-green { background: var(--green-btn); box-shadow: var(--green-shadow); border: 1px solid #4ade80; }
-        .btn-blue { background: var(--blue-btn); box-shadow: var(--blue-shadow); border: 1px solid #60a5fa; }
-        .btn-red { background: var(--red-btn); box-shadow: var(--red-shadow); border: 1px solid #f87171; }
-        .btn-yellow { background: var(--yellow-btn); box-shadow: var(--yellow-shadow); border: 1px solid #fde047; color: #1c1917;}
+        /* ANIMACIÓN FLASH AL RECIBIR COMANDO DESDE LA APP */
+        .flash-glow {
+            animation: pulse-border 0.4s ease-out;
+            transform: scale(1.05);
+            filter: brightness(1.3) !important;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 25px #38bdf8, 0 0 40px #38bdf8; }
+            100% { box-shadow: 0 5px 0 rgba(0,0,0,0.5); }
+        }
+
+        .btn-green { background: var(--green-btn); box-shadow: var(--green-shadow); border-top: 1px solid var(--green-bevel); }
+        .btn-blue { background: var(--blue-btn); box-shadow: var(--blue-shadow); border-top: 1px solid var(--blue-bevel); }
+        .btn-red { background: var(--red-btn); box-shadow: var(--red-shadow); border-top: 1px solid var(--red-bevel); }
+        .btn-orange { background: var(--orange-btn); box-shadow: var(--orange-shadow); }
+        .btn-emerald { background: var(--emerald-btn); box-shadow: var(--emerald-shadow); }
         .btn-dark { background: var(--dark-btn); box-shadow: var(--dark-shadow); border: 1px solid #475569; }
-        .btn-purple { background: var(--purple-btn); box-shadow: var(--purple-shadow); border: 1px solid #c084fc; }
+        .btn-purple { background: var(--purple-btn); box-shadow: var(--purple-shadow); }
 
-        /* Sizes */
-        .btn-square { width: 80px; height: 80px; }
-        .btn-rect { width: 100px; height: 60px; font-size: 18px; }
-        .btn-wide { width: 140px; height: 60px; font-size: 18px; }
-        .btn-huge { width: 120px; height: 120px; border-radius: 50%; font-size: 40px; }
-        .btn-huge::after { border-radius: 50%; }
+        .btn-square { width: 70px; height: 60px; font-size: 20px; }
+        .btn-rect { width: 85px; height: 50px; font-size: 14px; }
+        .btn-wide { width: 120px; height: 44px; font-size: 13px; }
+        .btn-huge { width: 88px; height: 88px; border-radius: 50%; font-size: 28px; }
 
-        /* Icons SVG */
-        svg { width: 32px; height: 32px; fill: currentColor; }
-        .btn-huge svg { width: 50px; height: 50px; }
-
-        /* Center Dashboard specific */
-        .center-dashboard { display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
-        
-        .time-box {
-            background: rgba(0,0,0,0.3); border: 1px solid #334155;
-            border-radius: 16px; padding: 20px;
-            display: flex; flex-direction: column; gap: 15px;
-            opacity: 0.4; pointer-events: none; transition: all 0.3s ease;
-        }
-        body.edit-mode .time-box {
-            opacity: 1; pointer-events: auto;
-            border-color: #f59e0b;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-        }
-
+        /* STATUS BAR INFERIOR */
         .status-bar {
-            background: #0f172a; border-radius: 12px; padding: 10px 20px;
+            background: #090d16; border-radius: 12px; padding: 8px 16px;
             display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #1e293b; margin-top: auto;
+            border: 1px solid #1e293b; margin-top: 10px;
         }
-        
-        .led { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444; transition: 0.3s; }
-        .led.green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
-        .led.yellow { background: #facc15; box-shadow: 0 0 8px #facc15; }
-        
-        .status-text { font-family: 'Share Tech Mono', monospace; color: #38bdf8; font-size: 18px; }
-
+        .last-cmd-indicator {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px; font-weight: 800; color: #a855f7;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+        <div class="app-title">
+            <span>🏀</span> MONTMARTRE - CONSOLA MANDO DE CONTROL
+        </div>
+        <div class="header-actions">
+            <button class="btn-toggle-tv" onclick="toggleTv()">📺 ABRIR / MOSTRAR TABLERO TV</button>
+            <div class="hardware-badge">
+                <div id="sync-led" class="led-dot"></div>
+                <span id="mando-dash-text">ESPERANDO HARDWARE ESP32...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
     <div class="dashboard">
-        
-        <!-- LOCAL PANEL -->
+
+        <!-- PANEL LOCAL -->
         <div class="panel side">
             <div class="panel-header header-local">LOCAL</div>
+
+            <!-- MARCADOR LOCAL EN VIVO -->
+            <div class="live-score-box local">
+                <span class="label" style="color: #4ade80;">PUNTOS LOCAL</span>
+                <div id="disp-local-score" class="score-digits digits-local">00</div>
+                <div class="score-meta-row">
+                    <span>FALTAS: <b id="disp-local-fouls" style="color:#fff;">0</b></span>
+                    <span id="disp-local-bonus" class="bonus-badge">BONUS</span>
+                </div>
+            </div>
+
+            <!-- BOTONERA LOCAL -->
             <div class="btn-grid">
-                <!-- Puntos -->
-                <div class="row">
-                    <div class="control-group">
-                        <span class="label">+1 PTS</span>
-                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 1)">+1</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">+2 PTS</span>
-                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 2)">+2</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">+3 PTS</span>
-                        <button class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 3)">+3</button>
+                <div class="control-group">
+                    <span class="label">PUNTOS</span>
+                    <div class="row">
+                        <button id="btn-local-p1" class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 1)">+1<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
+                        <button id="btn-local-p2" class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 2)">+2<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
+                        <button id="btn-local-p3" class="btn-square btn-green" onclick="sendCmd(1, 1, 0, 3)">+3<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
                     </div>
                 </div>
-                <!-- Correccion Puntos -->
                 <div class="row">
-                    <div class="control-group">
-                        <span class="label">CORREGIR PUNTO</span>
-                        <button class="btn-wide btn-dark" onclick="sendCmd(1, 1, 0, 255)">-1</button>
-                    </div>
+                    <button id="btn-local-sub" class="btn-wide btn-dark" style="border-color: #f59e0b;" onclick="sendCmd(1, 1, 0, 255)">-1 CORREGIR</button>
                 </div>
-                
-                <div style="height: 1px; background: var(--border-light); margin: 10px 0;"></div>
-                
-                <!-- Faltas -->
-                <div class="row">
-                    <div class="control-group">
-                        <span class="label" style="color: #f87171;">FALTA</span>
-                        <button class="btn-square btn-red" onclick="sendCmd(3, 1, 0, 1)">+1</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">CORREGIR</span>
-                        <button class="btn-square btn-dark" onclick="sendCmd(3, 1, 0, 255)">-1</button>
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 4px 0;"></div>
+                <div class="control-group">
+                    <span class="label" style="color: #f87171;">FALTAS EQUIPO</span>
+                    <div class="row">
+                        <button id="btn-local-f1" class="btn-square btn-red" onclick="sendCmd(3, 1, 0, 1)">+1<span style="font-size: 10px; opacity: 0.8;">FALTA</span></button>
+                        <button id="btn-local-fsub" class="btn-square btn-dark" onclick="sendCmd(3, 1, 0, 255)">-1<span style="font-size: 10px; opacity: 0.8;">CORREGIR</span></button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CENTER PANEL (MESA) -->
+        <!-- PANEL MESA CENTRAL -->
         <div class="panel center">
             <div class="panel-header header-mesa">MESA DE CONTROL</div>
-            
-            <div class="center-dashboard">
-                <!-- Main Controls -->
-                <div class="row" style="align-items: center; margin-bottom: 20px;">
-                    <div class="control-group">
-                        <span class="label" style="color: #a855f7;">EDITAR (SHIFT)</span>
-                        <button class="btn-rect btn-purple" id="btn-comando" onclick="toggleEditMode()">
-                            <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                        </button>
-                    </div>
 
-                    <div class="control-group" style="flex-direction: row; gap: 20px;">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span class="label" style="color: #4ade80; font-size: 16px;">START</span>
-                            <button class="btn-huge btn-green" onclick="handleStart()">
-                                <svg viewBox="0 0 24 24" style="fill: #1c1917;"><path d="M8 5v14l11-7z"/></svg>
-                            </button>
-                        </div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <span class="label" style="color: #f87171; font-size: 16px;">STOP</span>
-                            <button class="btn-huge btn-red" onclick="handleStop()">
-                                <svg viewBox="0 0 24 24" style="fill: white;"><path d="M6 6h12v12H6z"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <span class="label" style="font-size: 10px; color: #a855f7; margin-top: -10px;">+ EDITAR EN START = RESET PARTIDO</span>
+            <!-- RELOJ PRINCIPAL EN VIVO -->
+            <div id="clock-hero" class="clock-hero-box">
+                <div class="clock-meta-bar">
+                    <span id="clock-status-tag" class="clock-state-tag">DETENIDO</span>
+                    <span>POSESIÓN 24s: <b id="disp-shot-clock" style="color:#f59e0b;">24</b></span>
+                    <span>PERIODO: <b id="disp-period" style="color:#38bdf8; font-size:14px;">1</b></span>
+                </div>
+                <div id="disp-clock" class="clock-digits">10:00</div>
+            </div>
 
+            <!-- CONTROLES CENTRALES -->
+            <div class="btn-grid">
+                <div class="row">
                     <div class="control-group">
-                        <span class="label" style="color: #f87171;">BOCINA</span>
-                        <button class="btn-rect btn-red" onclick="sendCmd(6, 0, 0, 0)">
-                            <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5zm2 4v6c1.33 0 2-.67 2-3s-.67-3-2-3z"/></svg>
-                        </button>
+                        <span class="label">EDITAR</span>
+                        <button id="btn-comando" class="btn-rect btn-purple" onclick="toggleEditMode()">EDITAR</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label" style="color: #4ade80;">START RELOJ</span>
+                        <button id="btn-start" class="btn-huge btn-green" onclick="handleStart()">▶</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label" style="color: #f87171;">DETENER</span>
+                        <button id="btn-stop" class="btn-huge btn-red" onclick="handleStop()">■</button>
+                    </div>
+                    <div class="control-group">
+                        <span class="label" style="color: #f97316;">BOCINA</span>
+                        <button id="btn-sirena" class="btn-rect btn-orange" onclick="handleHorn()">📢 SIRENA</button>
                     </div>
                 </div>
 
-                <!-- Time Controls (Locked by default) -->
-                <div class="time-box">
+                <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 14px; border: 1px solid #334155;">
+                    <span class="label" style="display: block; text-align: center; margin-bottom: 4px;">PRESETS Y AJUSTE DE TIEMPO</span>
                     <div class="row">
-                        <div class="control-group">
-                            <span class="label">1 MIN</span>
-                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 1, 0, 0)">1:00</button>
-                        </div>
-                        <div class="control-group">
-                            <span class="label">5 MIN</span>
-                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 5, 0, 0)">5:00</button>
-                        </div>
-                        <div class="control-group">
-                            <span class="label">10 MIN</span>
-                            <button class="btn-rect btn-dark" onclick="sendCmd(7, 10, 0, 0)">10:00</button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="control-group">
-                            <button class="btn-rect btn-dark" onclick="sendCmd(8, 0, 0, 1)">+1 MIN</button>
-                        </div>
-                        <div class="control-group">
-                            <button class="btn-rect btn-dark" onclick="sendCmd(8, 0, 0, 255)">-1 MIN</button>
-                        </div>
+                        <button id="btn-t1" class="btn-rect btn-dark" onclick="sendCmd(7, 1, 0, 0)">1:00</button>
+                        <button id="btn-t5" class="btn-rect btn-dark" onclick="sendCmd(7, 5, 0, 0)">5:00</button>
+                        <button id="btn-t10" class="btn-rect btn-dark" onclick="sendCmd(7, 10, 0, 0)">10:00</button>
+                        <button id="btn-t-plus" class="btn-rect btn-dark" style="border-color: #38bdf8;" onclick="sendCmd(8, 0, 0, 1)">+1 MIN</button>
+                        <button id="btn-t-minus" class="btn-rect btn-dark" style="border-color: #38bdf8;" onclick="sendCmd(8, 0, 0, 255)">-1 MIN</button>
                     </div>
                 </div>
 
-                <!-- Bottom Controls -->
-                <div class="row" style="margin-top: 20px;">
+                <div class="row">
                     <div class="control-group">
                         <span class="label">PERIODO</span>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-rect btn-dark" onclick="sendCmd(5, 0, 0, 1)">+1</button>
-                            <button class="btn-rect btn-dark" onclick="sendCmd(5, 0, 0, 255)">-1</button>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="btn-per-plus" class="btn-rect btn-dark" style="width: 50px;" onclick="sendCmd(5, 0, 0, 1)">+1</button>
+                            <button id="btn-per-minus" class="btn-rect btn-dark" style="width: 50px;" onclick="sendCmd(5, 0, 0, 255)">-1</button>
                         </div>
                     </div>
 
-                    <div style="width: 1px; background: var(--border-light);"></div>
+                    <div style="width: 1px; height: 40px; background: #334155;"></div>
 
                     <div class="control-group">
-                        <span class="label" style="color: #4ade80;">VINCULAR (SYNC)</span>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-rect btn-dark" style="border-color: #4ade80;" onclick="handleSync()">SYNC</button>
-                            <button class="btn-rect btn-dark" style="border-color: #f87171;" onclick="handleUnpair()">UNPAIR</button>
+                        <span class="label" style="color: #ef4444;">RESETEAR</span>
+                        <button id="btn-reset" class="btn-rect btn-dark" style="border-color:#ef4444; width: 110px;" onclick="handleReset()">RESET 0</button>
+                    </div>
+
+                    <div style="width: 1px; height: 40px; background: #334155;"></div>
+
+                    <div class="control-group">
+                        <span class="label" style="color: #10b981;">RED ESP-NOW</span>
+                        <div style="display: flex; gap: 6px;">
+                            <button id="btn-sync" class="btn-rect btn-emerald" style="width: 100px;" onclick="handleSync()">VINCULAR</button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Status Bar -->
-                <div class="status-bar">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span class="label">ESTADO RED</span>
-                        <div id="sync-led" class="led"></div>
-                    </div>
-                    <span id="mando-dash-text" class="status-text">ESPERANDO...</span>
                 </div>
             </div>
         </div>
 
-        <!-- VISITA PANEL -->
+        <!-- PANEL VISITA -->
         <div class="panel side">
             <div class="panel-header header-visita">VISITA</div>
+
+            <!-- MARCADOR VISITA EN VIVO -->
+            <div class="live-score-box visita">
+                <span class="label" style="color: #60a5fa;">PUNTOS VISITA</span>
+                <div id="disp-visita-score" class="score-digits digits-visita">00</div>
+                <div class="score-meta-row">
+                    <span>FALTAS: <b id="disp-visita-fouls" style="color:#fff;">0</b></span>
+                    <span id="disp-visita-bonus" class="bonus-badge">BONUS</span>
+                </div>
+            </div>
+
+            <!-- BOTONERA VISITA -->
             <div class="btn-grid">
-                <!-- Puntos -->
-                <div class="row">
-                    <div class="control-group">
-                        <span class="label">+1 PTS</span>
-                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 1)">+1</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">+2 PTS</span>
-                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 2)">+2</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">+3 PTS</span>
-                        <button class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 3)">+3</button>
+                <div class="control-group">
+                    <span class="label">PUNTOS</span>
+                    <div class="row">
+                        <button id="btn-visita-p1" class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 1)">+1<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
+                        <button id="btn-visita-p2" class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 2)">+2<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
+                        <button id="btn-visita-p3" class="btn-square btn-blue" onclick="sendCmd(1, 2, 0, 3)">+3<span style="font-size: 10px; opacity: 0.8;">PTS</span></button>
                     </div>
                 </div>
-                <!-- Correccion Puntos -->
                 <div class="row">
-                    <div class="control-group">
-                        <span class="label">CORREGIR PUNTO</span>
-                        <button class="btn-wide btn-dark" onclick="sendCmd(1, 2, 0, 255)">-1</button>
-                    </div>
+                    <button id="btn-visita-sub" class="btn-wide btn-dark" style="border-color: #f59e0b;" onclick="sendCmd(1, 2, 0, 255)">-1 CORREGIR</button>
                 </div>
-                
-                <div style="height: 1px; background: var(--border-light); margin: 10px 0;"></div>
-                
-                <!-- Faltas -->
-                <div class="row">
-                    <div class="control-group">
-                        <span class="label" style="color: #f87171;">FALTA</span>
-                        <button class="btn-square btn-red" onclick="sendCmd(3, 2, 0, 1)">+1</button>
-                    </div>
-                    <div class="control-group">
-                        <span class="label">CORREGIR</span>
-                        <button class="btn-square btn-dark" onclick="sendCmd(3, 2, 0, 255)">-1</button>
+                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 4px 0;"></div>
+                <div class="control-group">
+                    <span class="label" style="color: #f87171;">FALTAS EQUIPO</span>
+                    <div class="row">
+                        <button id="btn-visita-f1" class="btn-square btn-red" onclick="sendCmd(3, 2, 0, 1)">+1<span style="font-size: 10px; opacity: 0.8;">FALTA</span></button>
+                        <button id="btn-visita-fsub" class="btn-square btn-dark" onclick="sendCmd(3, 2, 0, 255)">-1<span style="font-size: 10px; opacity: 0.8;">CORREGIR</span></button>
                     </div>
                 </div>
             </div>
@@ -349,88 +437,392 @@
 
     </div>
 
+    <!-- STATUS BAR INFERIOR -->
+    <div class="status-bar">
+        <span id="last-cmd-text" class="last-cmd-indicator">LISTO PARA RECIBIR COMANDOS DESDE LA APP O HARDWARE</span>
+        <span style="font-size: 11px; color: #64748b;">CANAL: FIBA PROFESIONAL</span>
+    </div>
+
     <script>
         const { ipcRenderer } = require('electron');
 
+        // ==========================================
+        // ESTADO GLOBAL DEL PARTIDO (SINCRONIZADO)
+        // ==========================================
+        let state = {
+            score: { local: 0, visita: 0 },
+            team_fouls: { local: 0, visita: 0 },
+            clock: 600,
+            clock_running: false,
+            period: 1,
+            shot_clock: 24
+        };
+
+        // Leer estado guardado de localStorage
+        try {
+            const saved = localStorage.getItem('tablero_state');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.score) state.score = parsed.score;
+                if (parsed.team_fouls) state.team_fouls = parsed.team_fouls;
+                if (parsed.clock !== undefined) state.clock = parsed.clock;
+                if (parsed.period !== undefined) state.period = parsed.period;
+                if (parsed.shot_clock !== undefined) state.shot_clock = parsed.shot_clock;
+            }
+        } catch(e) {}
+        state.clock_running = false;
+
+        function saveState() {
+            try {
+                localStorage.setItem('tablero_state', JSON.stringify(state));
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // MOTOR DEL RELOJ
+        // ==========================================
+        let targetTime = 0;
+        let clockInterval = null;
+
+        function startClock() {
+            if (state.clock_running) return;
+            state.clock_running = true;
+            targetTime = Date.now() + (state.clock * 1000);
+            clearInterval(clockInterval);
+            clockInterval = setInterval(() => {
+                const now = Date.now();
+                if (now >= targetTime) {
+                    state.clock = 0;
+                    state.clock_running = false;
+                    clearInterval(clockInterval);
+                    playBuzzerSound();
+                } else {
+                    state.clock = Math.ceil((targetTime - now) / 1000);
+                }
+                updateUI();
+                saveState();
+            }, 100);
+            updateUI();
+            saveState();
+        }
+
+        function stopClock() {
+            state.clock_running = false;
+            clearInterval(clockInterval);
+            updateUI();
+            saveState();
+        }
+
+        function toggleClock() {
+            if (state.clock_running) stopClock();
+            else startClock();
+        }
+
+        function adjustTargetTime() {
+            if (state.clock_running) {
+                targetTime = Date.now() + (state.clock * 1000);
+            }
+        }
+
+        // ==========================================
+        // SINTETIZADOR DE AUDIO (BOCINA / SIRENA)
+        // ==========================================
+        let audioCtx = null;
+        function playBuzzerSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+
+                const osc1 = audioCtx.createOscillator();
+                const osc2 = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc1.type = 'sawtooth';
+                osc1.frequency.setValueAtTime(220, now);
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(277, now);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 1.6);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 1.6);
+                osc2.stop(now + 1.6);
+            } catch(e) {}
+        }
+
+        // ==========================================
+        // ACTUALIZACIÓN DE INTERFAZ GRÁFICA
+        // ==========================================
+        function updateUI() {
+            // Puntos
+            document.getElementById('disp-local-score').innerText = String(state.score.local).padStart(2, '0');
+            document.getElementById('disp-visita-score').innerText = String(state.score.visita).padStart(2, '0');
+
+            // Faltas
+            document.getElementById('disp-local-fouls').innerText = state.team_fouls.local;
+            document.getElementById('disp-visita-fouls').innerText = state.team_fouls.visita;
+            document.getElementById('disp-local-bonus').classList.toggle('active', state.team_fouls.local >= 5);
+            document.getElementById('disp-visita-bonus').classList.toggle('active', state.team_fouls.visita >= 5);
+
+            // Periodo y 24s
+            document.getElementById('disp-period').innerText = state.period;
+            document.getElementById('disp-shot-clock').innerText = state.shot_clock;
+
+            // Reloj
+            const mins = Math.floor(state.clock / 60);
+            const secs = state.clock % 60;
+            const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            const clockEl = document.getElementById('disp-clock');
+            clockEl.innerText = timeStr;
+            clockEl.classList.toggle('running', state.clock_running);
+
+            // Hero box estado
+            const hero = document.getElementById('clock-hero');
+            hero.classList.toggle('running', state.clock_running);
+
+            const tag = document.getElementById('clock-status-tag');
+            tag.innerText = state.clock_running ? "EN JUEGO" : "DETENIDO";
+            tag.classList.toggle('running', state.clock_running);
+        }
+
+        // Destello visual en el botón correspondiente como confirmación de orden
+        function flashBtn(id) {
+            const b = document.getElementById(id);
+            if (b) {
+                b.classList.remove('flash-glow');
+                void b.offsetWidth;
+                b.classList.add('flash-glow');
+                setTimeout(() => b.classList.remove('flash-glow'), 400);
+            }
+        }
+
+        function setLastCmdText(text) {
+            const el = document.getElementById('last-cmd-text');
+            if (el) el.innerText = `● ${text}`;
+        }
+
+        // ==========================================
+        // EMISIÓN DE COMANDOS (BOTONES DE ESTA PANTALLA)
+        // ==========================================
         function sendCmd(cmd, team, player, value) {
-            ipcRenderer.send('virtual-command', { cmd, team, player, value });
+            // Aplicar de inmediato a la UI local
+            applyCommandLocally(cmd, team, player, value);
+
+            // Replicar a main.js (hacia el Tablero TV y al puerto USB)
+            if (typeof ipcRenderer !== 'undefined') {
+                ipcRenderer.send('virtual-command', { cmd, team, player, value });
+            }
         }
 
         let isEditMode = false;
-        
-        function handleStart() {
-            if (isEditMode) {
-                if(confirm('¿Seguro que deseas RESETEAR EL PARTIDO a 0?')) {
-                    sendCmd(9, 0, 0, 0);
-                    toggleEditMode();
-                }
-            } else {
-                sendCmd(12, 0, 0, 0); // Explicit START
-            }
-        }
-        function handleStop() {
-            sendCmd(13, 0, 0, 0); // Explicit STOP
-        }
-
-        function handleSync() {
-            sendCmd(153, 0, 0, 0);
-            document.getElementById('sync-led').classList.add('yellow');
-        }
-
-        function handleUnpair() {
-            if(confirm('¿Seguro que deseas desvincular este mando de la TV?')) {
-                sendCmd(154, 0, 0, 0);
-            }
-        }
-
         function toggleEditMode() {
             isEditMode = !isEditMode;
+            document.getElementById('btn-comando').style.border = isEditMode ? '2px solid #f59e0b' : '';
+            document.getElementById('btn-comando').style.background = isEditMode ? '#d97706' : '';
+        }
+
+        function handleStart() {
             if (isEditMode) {
-                document.body.classList.add('edit-mode');
-                document.getElementById('btn-comando').style.boxShadow = '0 0 20px #a855f7';
-                document.getElementById('btn-comando').style.border = '2px solid #fff';
+                handleReset();
             } else {
-                document.body.classList.remove('edit-mode');
-                document.getElementById('btn-comando').style.boxShadow = '';
-                document.getElementById('btn-comando').style.border = '';
+                sendCmd(12, 0, 0, 0);
             }
         }
 
-        // Teclado
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Shift' && !isEditMode) toggleEditMode();
-        });
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'Shift' && isEditMode) toggleEditMode();
-        });
+        function handleStop() { sendCmd(13, 0, 0, 0); }
+        function handleHorn() { sendCmd(6, 0, 0, 0); }
+        function handleSync() {
+            if (typeof ipcRenderer !== 'undefined') ipcRenderer.send('trigger-sync');
+            flashBtn('btn-sync');
+            setLastCmdText("ENVIANDO RÁFAGA DE SINCRONIZACIÓN ESP-NOW...");
+        }
 
-        // Escuchar Hardware
-        ipcRenderer.on('serial-command', (event, { cmd, team, player, value }) => {
-            if (cmd === 200) {
-                const dashText = document.getElementById('mando-dash-text');
-                const led = document.getElementById('sync-led');
-                
-                dashText.innerText = `TVs: ${player} / Vinculadas: ${team}`;
-                
-                led.className = 'led'; // reset
-                if (player > 0) {
+        function handleReset() {
+            if (confirm('¿Seguro que deseas REINICIAR EL PARTIDO a 0?')) {
+                sendCmd(9, 0, 0, 0);
+                if (isEditMode) toggleEditMode();
+            }
+        }
+
+        function toggleTv() {
+            if (typeof ipcRenderer !== 'undefined') {
+                ipcRenderer.send('toggle-tv-window');
+            }
+        }
+
+        // ==========================================
+        // PROCESAMIENTO CENTRAL DE COMANDOS
+        // (Tanto si vienen por USB desde la ESP32/App como si se tocan en la PC)
+        // ==========================================
+        function applyCommandLocally(cmd, team, player, value) {
+            const teamName = team === 1 ? 'local' : 'visita';
+            const signedValue = (value > 127) ? value - 256 : value;
+
+            switch (cmd) {
+                case 1: // Puntos
+                    state.score[teamName] += signedValue;
+                    if (state.score[teamName] < 0) state.score[teamName] = 0;
+                    if (team === 1) {
+                        if (signedValue === 1) flashBtn('btn-local-p1');
+                        else if (signedValue === 2) flashBtn('btn-local-p2');
+                        else if (signedValue === 3) flashBtn('btn-local-p3');
+                        else flashBtn('btn-local-sub');
+                        setLastCmdText(`PUNTOS LOCAL: ${signedValue > 0 ? '+' : ''}${signedValue}`);
+                    } else {
+                        if (signedValue === 1) flashBtn('btn-visita-p1');
+                        else if (signedValue === 2) flashBtn('btn-visita-p2');
+                        else if (signedValue === 3) flashBtn('btn-visita-p3');
+                        else flashBtn('btn-visita-sub');
+                        setLastCmdText(`PUNTOS VISITA: ${signedValue > 0 ? '+' : ''}${signedValue}`);
+                    }
+                    break;
+
+                case 2: // Falta personal
+                case 3: // Falta de equipo
+                    state.team_fouls[teamName] += signedValue;
+                    if (state.team_fouls[teamName] < 0) state.team_fouls[teamName] = 0;
+                    if (team === 1) {
+                        if (signedValue > 0) flashBtn('btn-local-f1');
+                        else flashBtn('btn-local-fsub');
+                        setLastCmdText(`FALTA LOCAL: ${signedValue > 0 ? '+1' : '-1'}`);
+                    } else {
+                        if (signedValue > 0) flashBtn('btn-visita-f1');
+                        else flashBtn('btn-visita-fsub');
+                        setLastCmdText(`FALTA VISITA: ${signedValue > 0 ? '+1' : '-1'}`);
+                    }
+                    break;
+
+                case 4: // Start / Stop Toggle
+                    toggleClock();
+                    if (state.clock_running) flashBtn('btn-start');
+                    else flashBtn('btn-stop');
+                    setLastCmdText(state.clock_running ? "RELOJ INICIADO" : "RELOJ DETENIDO");
+                    break;
+
+                case 12: // Start Explícito
+                    startClock();
+                    flashBtn('btn-start');
+                    setLastCmdText("RELOJ INICIADO");
+                    break;
+
+                case 13: // Stop Explícito
+                    stopClock();
+                    flashBtn('btn-stop');
+                    setLastCmdText("RELOJ DETENIDO");
+                    break;
+
+                case 5: // Periodo
+                    state.period += signedValue;
+                    if (state.period < 1) state.period = 1;
+                    if (state.period > 9) state.period = 9;
+                    if (signedValue > 0) flashBtn('btn-per-plus');
+                    else flashBtn('btn-per-minus');
+                    setLastCmdText(`PERIODO: ${state.period}`);
+                    break;
+
+                case 6: // Bocina / Sirena
+                    flashBtn('btn-sirena');
+                    playBuzzerSound();
+                    setLastCmdText("📢 BOCINA ACTIVADA");
+                    break;
+
+                case 7: // Set tiempo
+                    state.clock = (team * 60) + value;
+                    if (state.clock < 0) state.clock = 0;
+                    adjustTargetTime();
+                    if (team === 10) flashBtn('btn-t10');
+                    else if (team === 5) flashBtn('btn-t5');
+                    else if (team === 1) flashBtn('btn-t1');
+                    setLastCmdText(`TIEMPO AJUSTADO A ${team}:00`);
+                    break;
+
+                case 8: // +/- 1 minuto con redondeo
+                    if (signedValue > 0) {
+                        state.clock = (Math.floor(state.clock / 60) + 1) * 60;
+                        flashBtn('btn-t-plus');
+                    } else {
+                        state.clock = (Math.ceil(state.clock / 60) - 1) * 60;
+                        flashBtn('btn-t-minus');
+                    }
+                    if (state.clock < 0) state.clock = 0;
+                    adjustTargetTime();
+                    setLastCmdText(`${signedValue > 0 ? '+1' : '-1'} MINUTO`);
+                    break;
+
+                case 9: // Reset completo
+                    state.score.local = 0;
+                    state.score.visita = 0;
+                    state.team_fouls.local = 0;
+                    state.team_fouls.visita = 0;
+                    state.period = 1;
+                    state.clock = 600;
+                    state.clock_running = false;
+                    state.shot_clock = 24;
+                    clearInterval(clockInterval);
+                    flashBtn('btn-reset');
+                    setLastCmdText("PARTIDO REINICIADO A 0");
+                    break;
+
+                case 10: // Shot clock 24s
+                    state.shot_clock = value;
+                    break;
+
+                case 200: // Keepalive desde la App por Wi-Fi
+                    const led = document.getElementById('sync-led');
                     led.classList.add('green');
-                } else if (team > 0) {
-                    // red is default
+                    document.getElementById('mando-dash-text').innerText = "ESP32 CONECTADA | APP WI-FI EN LÍNEA";
+                    break;
+            }
+
+            updateUI();
+            saveState();
+        }
+
+        // ==========================================
+        // RECEPCIÓN DE EVENTOS DESDE ELECTRON (USB / ESP32)
+        // ==========================================
+        if (typeof ipcRenderer !== 'undefined') {
+            ipcRenderer.on('serial-command', (event, { cmd, team, player, value }) => {
+                applyCommandLocally(cmd, team, player, value);
+            });
+
+            ipcRenderer.on('mando-status', (event, { connected, port }) => {
+                const led = document.getElementById('sync-led');
+                const text = document.getElementById('mando-dash-text');
+                if (connected) {
+                    led.className = 'led-dot green';
+                    text.innerText = `ESP32 CONECTADA (${port || 'USB'})`;
+                } else {
+                    led.className = 'led-dot';
+                    text.innerText = `ESP32 DESCONECTADA - BUSCANDO...`;
                 }
+            });
+        }
+
+        // Sincronización entre ventanas (si TV modifica algo en localStorage)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'tablero_state' && e.newValue) {
+                try {
+                    const parsed = JSON.parse(e.newValue);
+                    if (parsed.score) state.score = parsed.score;
+                    if (parsed.team_fouls) state.team_fouls = parsed.team_fouls;
+                    if (parsed.clock !== undefined) state.clock = parsed.clock;
+                    if (parsed.period !== undefined) state.period = parsed.period;
+                    if (parsed.shot_clock !== undefined) state.shot_clock = parsed.shot_clock;
+                    updateUI();
+                } catch(err) {}
             }
         });
-            function autoScaleMando() {
-            const dash = document.querySelector('.dashboard');
-            if(dash) {
-                const scale = Math.min(window.innerWidth / 1250, window.innerHeight / 800);
-                dash.style.transform = `translate(-50%, -50%) scale($scale)`;
-            }
-        }
-        window.addEventListener('resize', autoScaleMando);
-        autoScaleMando();
+
+        // Inicializar interfaz
+        updateUI();
     </script>
 </body>
 </html>
-
-

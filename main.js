@@ -108,11 +108,28 @@ async function autoDetectSerialPort() {
     return COMPORT;
   }
 
+  // 1. En Linux, comprobar primero dispositivos del kernel directos (/dev/ttyUSB*, /dev/ttyACM*)
+  if (process.platform === 'linux') {
+    const fs = require('fs');
+    for (let i = 0; i < 5; i++) {
+      const usbPath = `/dev/ttyUSB${i}`;
+      if (fs.existsSync(usbPath)) {
+        console.log(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
+        return usbPath;
+      }
+      const acmPath = `/dev/ttyACM${i}`;
+      if (fs.existsSync(acmPath)) {
+        console.log(`[Auto-Detect Linux] Encontrado puerto CDC/ACM activo: ${acmPath}`);
+        return acmPath;
+      }
+    }
+  }
+
   try {
     const ports = await SerialPort.list();
-    console.log("[Auto-Detect] Puertos serie detectados en Windows:", ports.map(p => `${p.path} (${p.friendlyName || p.manufacturer || 'Generico'})`).join(", "));
+    console.log("[Auto-Detect] Puertos serie detectados:", ports.map(p => `${p.path} (${p.friendlyName || p.manufacturer || 'Generico'})`).join(", "));
 
-    // Prioridad 1: Chip UART ESP32 (CP210x de Silicon Labs [VID 10C4], CH340 [VID 1A86], FTDI [VID 0403])
+    // Prioridad 1: Chip UART ESP32 (CP210x [10C4], CH340 [1A86], FTDI [0403], Espressif)
     const espPort = ports.find(p => {
       const vId = (p.vendorId || '').toLowerCase();
       const mfg = (p.manufacturer || '').toLowerCase();
@@ -138,7 +155,13 @@ async function autoDetectSerialPort() {
     console.error("[Auto-Detect] Error buscando puertos serie:", err);
   }
 
-  return process.platform === 'linux' ? '/dev/ttyUSB0' : 'COM3';
+  if (process.platform === 'linux') {
+    const fs = require('fs');
+    if (fs.existsSync('/dev/ttyUSB0')) return '/dev/ttyUSB0';
+    if (fs.existsSync('/dev/ttyACM0')) return '/dev/ttyACM0';
+    return '/dev/ttyUSB0';
+  }
+  return 'COM3';
 }
 
 function notifyStatus(connected, portName) {
