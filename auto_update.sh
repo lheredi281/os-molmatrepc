@@ -2,7 +2,14 @@
 # Script de Auto-Actualización (Estilo Vercel)
 # Busca cambios en GitHub y reinicia la pantalla si hay código nuevo
 
-cd /home/chanca/tablero
+TABLERO_DIR="${HOME}/tablero"
+if [ ! -d "$TABLERO_DIR" ]; then
+    TABLERO_DIR="/home/vboxuser/tablero"
+fi
+if [ ! -d "$TABLERO_DIR" ]; then
+    TABLERO_DIR="/home/chanca/tablero"
+fi
+cd "$TABLERO_DIR" || exit 1
 
 # Buscar actualizaciones en la nube sin descargarlas aún
 git fetch origin main
