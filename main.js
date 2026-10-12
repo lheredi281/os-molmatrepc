@@ -131,10 +131,11 @@ async function autoDetectSerialPort() {
     return COMPORT;
   }
 
-  // 1. En Linux, comprobar primero dispositivos del kernel directos (/dev/ttyUSB*, /dev/ttyACM*)
+  // 1. En Linux, comprobar primero dispositivos del kernel directos en orden descendente
   if (process.platform === 'linux') {
     const fs = require('fs');
-    for (let i = 0; i < 5; i++) {
+    // Buscar de ttyUSB4 a ttyUSB0 para tomar siempre la reconexión más reciente
+    for (let i = 4; i >= 0; i--) {
       const usbPath = `/dev/ttyUSB${i}`;
       if (fs.existsSync(usbPath)) {
         writeDiagLog(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
@@ -168,7 +169,7 @@ async function autoDetectSerialPort() {
       return espPort.path;
     }
 
-    // Prioridad 2: Cualquier puerto serie con VID que NO sea un vínculo Bluetooth
+    // Prioridad 2: Cualquier puerto USB que NO sea un vínculo Bluetooth
     const otherUsb = ports.find(p => p.vendorId && !p.friendlyName?.toLowerCase().includes('bluetooth'));
     if (otherUsb) {
       writeDiagLog(`[Auto-Detect] -> Puerto USB alternativo: ${otherUsb.path}`);
@@ -176,23 +177,6 @@ async function autoDetectSerialPort() {
     }
   } catch (err) {
     writeDiagLog(`[Auto-Detect] Error buscando puertos serie: ${err.message}`);
-  }
-
-  if (process.platform === 'linux') {
-    const fs = require('fs');
-    // Buscar puertos en orden descendente para tomar el puerto activo actual tras desconexión
-    for (let i = 4; i >= 0; i--) {
-      const usbPath = `/dev/ttyUSB${i}`;
-      if (fs.existsSync(usbPath)) {
-        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto serie activo: ${usbPath}`);
-        return usbPath;
-      }
-      const acmPath = `/dev/ttyACM${i}`;
-      if (fs.existsSync(acmPath)) {
-        writeDiagLog(`[Auto-Detect Linux] Encontrado puerto CDC/ACM activo: ${acmPath}`);
-        return acmPath;
-      }
-    }
   }
 
   return 'COM3';
@@ -225,39 +209,91 @@ function initSerialPort(initialPort) {
     }
 
     let activePortName = initialPort;
+    let isReconnecting = false;
+
+    function scheduleReconnect() {
+      if (isReconnecting) return;
+      isReconnecting = true;
+      notifyStatus(false, activePortName);
+
+      if (globalPort) {
+        try { globalPort.removeAllListeners(); } catch (e) {}
+        try { if (globalPort.isOpen) globalPort.close(); } catch (e) {}
+        globalPort = null;
+      }
+
+      setTimeout(async () => {
+        isReconnecting = false;
+        activePortName = await autoDetectSerialPort();
+        connect();
+      }, 2000);
+    }
 
     function connect() {
       writeDiagLog(`[Serial] Intentando conectar con ESP32 en ${activePortName}...`);
       
-      globalPort = new SerialPort({ path: activePortName, baudRate: 115200 }, function (err) {
-        if (err) {
-          writeDiagLog(`[Status] Error abriendo ${activePortName}: ${err.message}. Reintentando en 3s...`);
-          notifyStatus(false, activePortName);
-          setTimeout(async () => {
-            activePortName = await autoDetectSerialPort();
-            connect();
-          }, 3000);
-          return;
+      try {
+        globalPort = new SerialPort({ path: activePortName, baudRate: 115200 }, function (err) {
+          if (err) {
+            writeDiagLog(`[Status] Error abriendo ${activePortName}: ${err.message}. Reintentando en 2s...`);
+            scheduleReconnect();
+            return;
+          }
+
+          writeDiagLog(`[Status] Conectado exitosamente a ESP32 en ${activePortName}. MODO ACTIVO.`);
+          notifyStatus(true, activePortName);
+        });
+
+        globalPort.on('close', () => {
+          writeDiagLog(`[Status] Puerto ${activePortName} cerrado.`);
+          scheduleReconnect();
+        });
+
+        globalPort.on('error', (err) => {
+          writeDiagLog(`[Status] Error en puerto serie: ${err.message}. Forzando reconexión...`);
+          scheduleReconnect();
+        });
+
+        let buffer = Buffer.alloc(0);
+
+        globalPort.on('data', (chunk) => {
+          buffer = Buffer.concat([buffer, chunk]);
+
+          // Procesar paquetes completos de 5 bytes
+          while (buffer.length >= 5) {
+            const cmd = buffer[0];
+            const team = buffer[1];
+            const player = buffer[2];
+            const value = buffer[3];
+            const checksum = buffer[4];
+
+            const calculatedChecksum = (cmd + team + player + value) & 0xFF;
+
+            if (checksum === calculatedChecksum) {
+              broadcastCommand(cmd, team, player, value);
+              buffer = buffer.subarray(5);
+            } else {
+              buffer = buffer.subarray(1);
+            }
+          }
+        });
+      } catch (err) {
+        writeDiagLog(`[Serial] Excepción creando SerialPort: ${err.message}`);
+        scheduleReconnect();
+      }
+    }
+
+    connect();
+
+    // Watchdog de puerto: cada 5s revisa si el puerto está vivo
+    setInterval(async () => {
+      if (!globalPort || !globalPort.isOpen) {
+        if (!isReconnecting) {
+          writeDiagLog('[Watchdog Serial] Puerto caído o no abierto. Iniciando reconexión...');
+          scheduleReconnect();
         }
-
-        writeDiagLog(`[Status] Conectado exitosamente a ESP32 en ${activePortName}. MODO ACTIVO.`);
-        notifyStatus(true, activePortName);
-      });
-
-      globalPort.on('close', () => {
-        writeDiagLog(`[Status] Puerto ${activePortName} desconectado.`);
-        notifyStatus(false, activePortName);
-        setTimeout(async () => {
-          activePortName = await autoDetectSerialPort();
-          connect();
-        }, 3000);
-      });
-
-      globalPort.on('error', (err) => {
-        writeDiagLog(`[Status] Error en puerto serie: ${err.message}`);
-      });
-
-      let buffer = Buffer.alloc(0);
+      }
+    }, 5000);
 
       globalPort.on('data', (chunk) => {
         buffer = Buffer.concat([buffer, chunk]);
